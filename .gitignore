@@ -1,0 +1,9 @@
+﻿# OS / editor
+.DS_Store
+Thumbs.db
+*.tmp
+*.bak
+
+# Working scratch
+Studio_Exports/
+NotebookLM_Studio_Inventory.md

@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KSP HT Metering — Unified Engineering Dashboard</title>
+<style>
+  :root {
+    --bg: #000000;
+    --surface: #0d0d0d;
+    --card: #141414;
+    --border: #2a2a2a;
+    --accent: #ff8000;
+    --accent2: #ff6600;
+    --accent3: #ffaa00;
+    --teal: #00d4aa;
+    --danger: #e84040;
+    --text: #ffffff;
+    --text-dim: #cccccc;
+    --muted: #aaaaaa;
+    --radius: 16px;
+    --radius-sm: 10px;
+    --font: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    min-height: 100vh;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── HEADER ── */
+  header {
+    padding: 18px 36px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(180deg, rgba(255, 128, 0, 0.08) 0%, transparent 100%);
+    flex-shrink: 0;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+  .brand img {
+    height: 64px;
+    width: auto;
+    max-width: 260px;
+    object-fit: contain;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.02);
+    padding: 4px 8px;
+  }
+  .brand-title {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .brand-title h1 {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    line-height: 1.2;
+    color: #ffffff;
+  }
+  .brand-title h1 span {
+    color: var(--accent);
+  }
+  .brand-title .sub {
+    font-size: 12px;
+    color: var(--teal);
+    font-weight: 500;
+    letter-spacing: 0.4px;
+  }
+  .header-badge {
+    font-size: 11px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    background: rgba(255, 128, 0, 0.12);
+    color: var(--accent);
+    border: 1px solid rgba(255, 128, 0, 0.35);
+    font-weight: 700;
+    letter-spacing: 0.6px;
+  }
+
+  /* ── NAV TABS ── */
+  nav {
+    padding: 0 36px;
+    display: flex;
+    gap: 4px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    border-bottom: 1px solid var(--border);
+    background: rgba(13, 13, 13, 0.6);
+    backdrop-filter: blur(10px);
+    flex-shrink: 0;
+  }
+  nav::-webkit-scrollbar { display: none; }
+  .tab {
+    padding: 16px 22px;
+    font-size: 14px;
+    font-weight: 500;
+    border: none;
+    background: none;
+    color: var(--muted);
+    cursor: pointer;
+    white-space: nowrap;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    letter-spacing: 0.1px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .tab:hover { color: #ffffff; }
+  .tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+    font-weight: 700;
+    background: linear-gradient(180deg, transparent 0%, rgba(255, 128, 0, 0.05) 100%);
+  }
+  .tab .icon {
+    font-size: 16px;
+  }
+
+  /* ── MAIN ── */
+  main {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+  }
+  .panel {
+    display: none;
+    height: 100%;
+    width: 100%;
+    animation: fadeIn 0.3s ease;
+  }
+  .panel.active { display: block; }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .panel iframe {
+    border: none;
+    width: 100%;
+    height: 100%;
+    min-height: calc(100vh - 145px);
+    background: var(--bg);
+    display: block;
+  }
+
+  /* ── DOWNLOAD PANEL ── */
+  .pdf-panel {
+    padding: 36px;
+    max-width: 1200px;
+    margin: 0 auto;
+    height: 100%;
+    overflow-y: auto;
+  }
+  .pdf-header {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+  .pdf-header h2 {
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: -0.6px;
+    background: linear-gradient(135deg, var(--accent), var(--accent3));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 8px;
+  }
+  .pdf-header p {
+    color: var(--muted);
+    font-size: 15px;
+    max-width: 640px;
+    margin: 0 auto;
+  }
+
+  .pdf-card {
+    background: var(--card);
+    border: 1px solid rgba(255, 128, 0, 0.3);
+    border-radius: var(--radius);
+    padding: 32px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+    margin-bottom: 24px;
+    background-image: linear-gradient(135deg, rgba(255, 128, 0, 0.04), transparent);
+  }
+  .pdf-preview {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    height: 460px;
+    position: relative;
+  }
+  .pdf-preview embed,
+  .pdf-preview object,
+  .pdf-preview iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+  .pdf-info h3 {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: var(--text);
+  }
+  .pdf-info p.lead {
+    color: var(--text-dim);
+    font-size: 14px;
+    line-height: 1.7;
+    margin-bottom: 22px;
+  }
+  .pdf-meta {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 16px 20px;
+    margin-bottom: 24px;
+  }
+  .pdf-meta-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .pdf-meta-row:last-child { border-bottom: none; }
+  .pdf-meta-row .key { color: var(--muted); }
+  .pdf-meta-row .val { color: var(--text); font-weight: 600; }
+
+  .dl-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #000;
+    padding: 16px 32px;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 700;
+    text-decoration: none;
+    letter-spacing: 0.3px;
+    transition: all 0.2s;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(255, 128, 0, 0.25);
+  }
+  .dl-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(255, 128, 0, 0.4);
+  }
+  .dl-btn .ico {
+    font-size: 22px;
+    line-height: 1;
+  }
+  .dl-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: 12px;
+    background: transparent;
+    color: var(--text);
+    padding: 16px 22px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    border: 1px solid var(--border);
+    transition: all 0.2s;
+  }
+  .dl-secondary:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .pdf-features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-top: 28px;
+  }
+  .pdf-feature {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 18px 20px;
+    transition: all 0.2s;
+  }
+  .pdf-feature:hover {
+    border-color: rgba(255, 128, 0, 0.5);
+    transform: translateY(-2px);
+  }
+  .pdf-feature .ic {
+    font-size: 22px;
+    margin-bottom: 8px;
+    display: block;
+  }
+  .pdf-feature h4 {
+    font-size: 13px;
+    color: var(--accent);
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .pdf-feature p {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  /* ── LOADING ── */
+  .loader {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.4);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .loader.show { opacity: 1; }
+  .loader .spinner {
+    width: 38px;
+    height: 38px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── FOOTER ── */
+  footer {
+    padding: 12px 36px;
+    text-align: center;
+    border-top: 1px solid var(--border);
+    font-size: 11px;
+    color: var(--muted);
+    background: var(--surface);
+    letter-spacing: 0.4px;
+    flex-shrink: 0;
+  }
+  footer span { color: var(--accent); font-weight: 600; }
+
+  @media (max-width: 900px) {
+    header { padding: 14px 16px; flex-direction: column; gap: 12px; align-items: flex-start; }
+    nav { padding: 0 16px; }
+    .brand img { height: 50px; }
+    .brand-title h1 { font-size: 17px; }
+    .pdf-panel { padding: 20px; }
+    .pdf-card { grid-template-columns: 1fr; }
+    .pdf-preview { height: 360px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <img src="logo.png" alt="KSP Logo">
+    <div class="brand-title">
+      <h1>KSP <span>HT Metering</span> — Unified Engineering Dashboard</h1>
+      <div class="sub">Er K. Satya Paripurna Kumar &nbsp;·&nbsp; B.E, M.B.A, M.I.E</div>
+    </div>
+  </div>
+</header>
+
+<nav>
+  <button class="tab active" onclick="showPanel('ksp', this)">
+    <span class="icon">⚡</span> KSP HT Metering Dashboard
+  </button>
+  <button class="tab" onclick="showPanel('ht', this)">
+    <span class="icon">📊</span> HT Metering Reference
+  </button>
+  <button class="tab" onclick="showPanel('pdf', this)">
+    <span class="icon">📄</span> Download PDF
+  </button>
+</nav>
+
+<main>
+  <!-- KSP HT Metering Dashboard -->
+  <div class="panel active" id="ksp-panel">
+    <iframe src="KSP_HT_Metering_Dashboard.html" title="KSP HT Metering Dashboard" loading="eager"></iframe>
+  </div>
+
+  <!-- HT Metering Reference -->
+  <div class="panel" id="ht-panel">
+    <iframe id="ht-iframe" data-src="HT_Metering_Dashboard.html" title="HT Metering Reference" loading="lazy"></iframe>
+  </div>
+
+  <!-- Download PDF -->
+  <div class="panel" id="pdf-panel">
+    <div class="pdf-panel">
+      <div class="pdf-header">
+        <h2>📄 Download PDF — KSP HT Meters Original</h2>
+        <p>The original source document by Er K. Satya Paripurna Kumar — covering High Tension Metering practice, schemes, fault analysis, vector diagnostics, commissioning standards, and APSEB field references.</p>
+      </div>
+
+      <div class="pdf-card">
+        <div class="pdf-preview">
+          <object data="KSP_HT_Meters_Original.pdf" type="application/pdf">
+            <iframe src="KSP_HT_Meters_Original.pdf"></iframe>
+          </object>
+        </div>
+        <div class="pdf-info">
+          <h3>KSP_HT_Meters_Original.pdf</h3>
+          <p class="lead">A comprehensive engineering reference compiled from on-field practice — the source manuscript that underpins this dashboard. Includes original sketches, terminal configuration tables, fault registration phasor analysis, and APSEB ledger data.</p>
+
+          <div class="pdf-meta">
+            <div class="pdf-meta-row"><span class="key">File name</span><span class="val">KSP_HT_Meters_Original.pdf</span></div>
+            <div class="pdf-meta-row"><span class="key">File size</span><span class="val">~16.7 MB</span></div>
+            <div class="pdf-meta-row"><span class="key">Format</span><span class="val">PDF (Portable Document Format)</span></div>
+            <div class="pdf-meta-row"><span class="key">Author</span><span class="val">Er K. Satya Paripurna Kumar</span></div>
+            <div class="pdf-meta-row"><span class="key">Subject</span><span class="val">HT Metering — Engineering Reference</span></div>
+          </div>
+
+          <a class="dl-btn" href="KSP_HT_Meters_Original.pdf" download="KSP_HT_Meters_Original.pdf">
+            <span class="ico">⬇</span> Download PDF
+          </a>
+          <a class="dl-secondary" href="KSP_HT_Meters_Original.pdf" target="_blank" rel="noopener">
+            <span class="ico">↗</span> Open in new tab
+          </a>
+        </div>
+      </div>
+
+      <div class="pdf-features">
+        <div class="pdf-feature">
+          <span class="ic">📐</span>
+          <h4>SLDs &amp; Schemes</h4>
+          <p>Single-line diagrams for HTCT, LTCT, ABT, and Traction metering at 11/33/132 kV.</p>
+        </div>
+        <div class="pdf-feature">
+          <span class="ic">⚙️</span>
+          <h4>CT &amp; PT Specs</h4>
+          <p>Construction, accuracy classes, burden, knee-point voltage, polarity testing.</p>
+        </div>
+        <div class="pdf-feature">
+          <span class="ic">⚠️</span>
+          <h4>Fault Cases</h4>
+          <p>28 registration fault cases — 3-wire and 4-wire — with phasor analysis and % error.</p>
+        </div>
+        <div class="pdf-feature">
+          <span class="ic">🧪</span>
+          <h4>Field Testing</h4>
+          <p>Phantom load, dial test, MRT online test, sealing procedure, earth resistance.</p>
+        </div>
+        <div class="pdf-feature">
+          <span class="ic">📋</span>
+          <h4>APSEB Records</h4>
+          <p>Actual field data from Cheepurupalli 33/11kV substation and traction feeders.</p>
+        </div>
+        <div class="pdf-feature">
+          <span class="ic">📖</span>
+          <h4>Standards</h4>
+          <p>IS 2705, IS 3156, IS 14697, CEA 2006, CERC ABT, IS 3043 earthing.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  KSP HT Metering — Unified Engineering Dashboard &nbsp;·&nbsp; <span>APSEB Field Reference</span> &nbsp;·&nbsp; CEA Metering Regulations 2006 &nbsp;·&nbsp; IS 2705 &nbsp;·&nbsp; IS 3156
+</footer>
+
+<script>
+  function showPanel(id, btn) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById(id + '-panel').classList.add('active');
+    btn.classList.add('active');
+
+    // Lazy-load the HT Reference iframe the first time it is shown
+    if (id === 'ht') {
+      const ifr = document.getElementById('ht-iframe');
+      if (ifr && !ifr.src && ifr.dataset.src) {
+        ifr.src = ifr.dataset.src;
+      }
+    }
+  }
+</script>
+</body>
+</html>

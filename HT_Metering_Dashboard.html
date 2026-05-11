@@ -1,0 +1,1998 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HT Metering Systems — Engineering Reference Dashboard</title>
+<style>
+:root {
+  --bg:#F5F5F7; --nav-bg:rgba(255,255,255,0.85); --card:#fff;
+  --blue:#0071E3; --blue2:#005BBB; --text:#1D1D1F; --text2:#6E6E73;
+  --border:#D2D2D7; --red:#FF3B30; --green:#34C759; --orange:#FF9500;
+  --purple:#AF52DE; --teal:#5AC8FA; --yellow:#FFCC00;
+  --radius:12px; --shadow:0 2px 20px rgba(0,0,0,0.08);
+  --shadow2:0 4px 30px rgba(0,0,0,0.12);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+nav{position:sticky;top:0;z-index:100;background:var(--nav-bg);backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid var(--border);padding:0 24px}
+.nav-inner{max-width:1400px;margin:0 auto;display:flex;align-items:center;gap:4px;overflow-x:auto;scrollbar-width:none;padding:12px 0}
+.nav-inner::-webkit-scrollbar{display:none}
+.nav-brand{font-size:15px;font-weight:700;color:var(--text);white-space:nowrap;margin-right:16px;flex-shrink:0}
+.nav-brand span{color:var(--blue)}
+.tab{padding:8px 14px;border-radius:8px;border:1px solid transparent;background:transparent;color:#1D1D1F;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .2s;flex-shrink:0;letter-spacing:.1px}
+.tab:hover{background:rgba(0,113,227,0.1);color:var(--blue);border-color:rgba(0,113,227,0.25)}
+.tab.active{background:var(--blue);color:#fff;border-color:var(--blue);box-shadow:0 2px 8px rgba(0,113,227,0.25)}
+main{max-width:1400px;margin:0 auto;padding:32px 24px}
+.section{display:none}.section.active{display:block}
+h1{font-size:36px;font-weight:700;letter-spacing:-.5px;margin-bottom:8px}
+h2{font-size:24px;font-weight:600;margin-bottom:16px}
+h3{font-size:18px;font-weight:600;margin-bottom:10px}
+h4{font-size:15px;font-weight:600;margin-bottom:6px}
+.subtitle{font-size:17px;color:var(--text2);margin-bottom:32px}
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.g4{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.card{background:var(--card);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow);border:1px solid var(--border);transition:transform .2s,box-shadow .2s;animation:fadeUp .4s ease both}
+.card:hover{transform:translateY(-2px);box-shadow:var(--shadow2)}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.card:nth-child(2){animation-delay:.05s}.card:nth-child(3){animation-delay:.1s}.card:nth-child(4){animation-delay:.15s}
+.card:nth-child(5){animation-delay:.2s}.card:nth-child(6){animation-delay:.25s}
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600;margin-bottom:10px}
+.badge-blue{background:#E8F1FB;color:var(--blue)}
+.badge-green{background:#E8F8EC;color:#1a7f37}
+.badge-orange{background:#FFF3E0;color:#c75a00}
+.badge-red{background:#FFECEC;color:#c0392b}
+.badge-purple{background:#F3E8FF;color:#6e2a9e}
+.badge-teal{background:#E0F7FA;color:#006064}
+.badge-yellow{background:#FFFDE7;color:#7c6000}
+.badge-gray{background:#F2F2F7;color:#636366}
+.kpi{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:28px}
+.kpi-card{background:var(--card);border-radius:var(--radius);padding:18px 22px;flex:1;min-width:160px;box-shadow:var(--shadow);border:1px solid var(--border)}
+.kpi-val{font-size:28px;font-weight:700;color:var(--blue)}
+.kpi-lbl{font-size:12px;color:var(--text2);margin-top:2px}
+.accord{border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:10px}
+.accord-hdr{padding:16px 20px;background:var(--card);cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-weight:600;font-size:15px;transition:background .15s}
+.accord-hdr:hover{background:#F2F2F7}
+.accord-hdr .arrow{font-size:12px;transition:transform .2s;color:var(--text2)}
+.accord-body{display:none;padding:0 20px 20px;background:var(--card);border-top:1px solid var(--border)}
+.accord-body.open{display:block}
+.accord-hdr.open .arrow{transform:rotate(180deg)}
+table{width:100%;border-collapse:collapse;font-size:14px;margin-top:8px}
+th{background:#F2F2F7;padding:10px 12px;text-align:left;font-weight:600;font-size:13px;border-bottom:2px solid var(--border)}
+td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:top}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#FAFAFA}
+.tag{display:inline-block;background:#F2F2F7;border-radius:6px;padding:2px 8px;font-size:12px;margin:2px;color:var(--text)}
+.tag-blue{background:#E8F1FB;color:var(--blue)}
+.tag-red{background:#FFECEC;color:#c0392b}
+.tag-green{background:#E8F8EC;color:#1a7f37}
+.tag-orange{background:#FFF3E0;color:#c75a00}
+.divider{height:1px;background:var(--border);margin:28px 0}
+.info-box{background:#E8F1FB;border-left:4px solid var(--blue);border-radius:0 8px 8px 0;padding:14px 16px;margin:12px 0;font-size:14px}
+.warn-box{background:#FFF3E0;border-left:4px solid var(--orange);border-radius:0 8px 8px 0;padding:14px 16px;margin:12px 0;font-size:14px}
+.danger-box{background:#FFECEC;border-left:4px solid var(--red);border-radius:0 8px 8px 0;padding:14px 16px;margin:12px 0;font-size:14px}
+.success-box{background:#E8F8EC;border-left:4px solid var(--green);border-radius:0 8px 8px 0;padding:14px 16px;margin:12px 0;font-size:14px}
+.formula{background:#1D1D1F;color:#F5F5F7;border-radius:8px;padding:14px 18px;font-family:'SF Mono',Menlo,monospace;font-size:13px;margin:10px 0;overflow-x:auto}
+.formula span.hi{color:#FF9500}
+.formula span.eq{color:#5AC8FA}
+.formula span.val{color:#34C759}
+svg text{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display',sans-serif}
+.svgwrap{background:var(--card);border-radius:var(--radius);padding:20px;border:1px solid var(--border);box-shadow:var(--shadow);overflow-x:auto;margin-bottom:16px}
+.svgwrap h3{margin-bottom:12px;color:var(--text2);font-size:14px;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.fault-case{background:var(--card);border-radius:10px;border:1px solid var(--border);padding:14px 18px;margin-bottom:8px}
+.fault-case h4{color:var(--red);margin-bottom:6px}
+.fault-case .result{color:var(--text2);font-size:13px}
+.fault-case .result strong{color:var(--orange)}
+ul.eng{list-style:none;padding:0}
+ul.eng li{padding:6px 0;border-bottom:1px solid var(--border);font-size:14px;display:flex;gap:8px;align-items:flex-start}
+ul.eng li:last-child{border-bottom:none}
+ul.eng li::before{content:"▸";color:var(--blue);font-size:12px;flex-shrink:0;margin-top:2px}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+@media(max-width:768px){.two-col{grid-template-columns:1fr}}
+.section-title{display:flex;align-items:center;gap:12px;margin-bottom:24px}
+.section-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.hero-band{background:linear-gradient(135deg,#0071E3 0%,#005BBB 100%);border-radius:var(--radius);padding:32px;color:#fff;margin-bottom:28px}
+.hero-band h1{color:#fff}
+.hero-band .subtitle{color:rgba(255,255,255,0.8)}
+.quick-ref th{background:#0071E3;color:#fff}
+.step{display:flex;gap:16px;padding:14px 0;border-bottom:1px solid var(--border)}
+.step:last-child{border-bottom:none}
+.step-num{width:32px;height:32px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0}
+.step-body h4{margin-bottom:4px}
+.step-body p{font-size:14px;color:var(--text2)}
+.fault-viz{display:block;margin-top:10px;background:linear-gradient(135deg,#FAFCFF 0%,#F2F6FA 100%);border-radius:8px;padding:6px 10px;border:1px solid var(--border);overflow:hidden}
+.fault-viz svg{width:100%;height:150px;display:block}
+.fault-viz .vlabel{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display',sans-serif;font-size:9px;font-weight:700;fill:#6E6E73;letter-spacing:.4px}
+.fault-viz .vbig{font-size:22px;font-weight:800;font-family:-apple-system,BlinkMacSystemFont,sans-serif}
+.fault-viz .vsub{font-size:9px;fill:#6E6E73;font-weight:600;letter-spacing:.3px}
+.fault-viz .fault-flags{display:flex;flex-wrap:wrap;gap:4px;margin:4px 0 2px;padding:0 2px}
+.fault-viz .fflag{font-size:10px;padding:2px 8px;border-radius:10px;background:#FFECEC;color:#c0392b;font-weight:600;letter-spacing:.1px}
+.fault-viz .fflag.warn{background:#FFF3E0;color:#c75a00}
+.fault-viz .fflag.ok{background:#E8F8EC;color:#1a7f37}
+</style>
+</head>
+<body>
+<nav>
+  <div class="nav-inner">
+    <div class="nav-brand">HT <span>Metering</span></div>
+    <button class="tab active" onclick="showSection('overview',this)">Overview</button>
+    <button class="tab" onclick="showSection('types',this)">Metering Types</button>
+    <button class="tab" onclick="showSection('voltage',this)">Voltage Config</button>
+    <button class="tab" onclick="showSection('equipment',this)">Equipment</button>
+    <button class="tab" onclick="showSection('terminal',this)">Terminal Config</button>
+    <button class="tab" onclick="showSection('schemes',this)">Schemes &amp; SLD</button>
+    <button class="tab" onclick="showSection('fault',this)">Fault Analysis</button>
+    <button class="tab" onclick="showSection('testing',this)">Field Testing</button>
+    <button class="tab" onclick="showSection('special',this)">Special Topics</button>
+    <button class="tab" onclick="showSection('standards',this)">Standards</button>
+  </div>
+</nav>
+<main>
+<!-- ===== OVERVIEW ===== -->
+<div id="overview" class="section active">
+  <div class="hero-band">
+    <h1>HT Metering Systems</h1>
+    <p class="subtitle">APSEB Engineering Reference · CEA Metering Regulations 2006 · IS 2705 · IS 3156</p>
+  </div>
+  <div class="kpi">
+    <div class="kpi-card"><div class="kpi-val">6</div><div class="kpi-lbl">Metering Types</div></div>
+    <div class="kpi-card"><div class="kpi-val">3</div><div class="kpi-lbl">Voltage Levels (11/33/132kV)</div></div>
+    <div class="kpi-card"><div class="kpi-val">18</div><div class="kpi-lbl">Terminal Configurations</div></div>
+    <div class="kpi-card"><div class="kpi-val">28</div><div class="kpi-lbl">Fault Analysis Cases</div></div>
+    <div class="kpi-card"><div class="kpi-val">0.2S</div><div class="kpi-lbl">CT Accuracy (Metering)</div></div>
+    <div class="kpi-card"><div class="kpi-val">4</div><div class="kpi-lbl">Sealing Points</div></div>
+  </div>
+
+  <h2 style="margin-bottom:16px">APSEB Contracted Demand Thresholds</h2>
+  <div class="grid g3" style="margin-bottom:28px">
+    <div class="card" style="border-top:4px solid var(--green)">
+      <span class="badge badge-green">≤ 1500 KVA</span>
+      <h3>11 kV Supply</h3>
+      <p style="font-size:14px;color:var(--text2)">HTCT metering at LT side (415V). CT/PT installed at consumer end. Standard 3-phase 3-wire or 4-wire configuration.</p>
+    </div>
+    <div class="card" style="border-top:4px solid var(--orange)">
+      <span class="badge badge-orange">1501 – 5000 KVA</span>
+      <h3>33 kV Supply</h3>
+      <p style="font-size:14px;color:var(--text2)">HTCT metering at 33kV bus. Main + Check meter mandatory. ABT (Availability Based Tariff) applicable for bulk consumers.</p>
+    </div>
+    <div class="card" style="border-top:4px solid var(--red)">
+      <span class="badge badge-red">&gt; 5001 KVA</span>
+      <h3>132 / 220 kV Supply</h3>
+      <p style="font-size:14px;color:var(--text2)">EHV metering. ABT metering mandatory. CVT (Capacitor Voltage Transformer) replaces electromagnetic PT. Traction feeders included.</p>
+    </div>
+  </div>
+
+  <h2 style="margin-bottom:16px">Tariff Structure (Two-Part Tariff)</h2>
+  <div class="grid g2" style="margin-bottom:28px">
+    <div class="card">
+      <span class="badge badge-blue">Demand Charge</span>
+      <h3>Maximum Demand (MD)</h3>
+      <ul class="eng">
+        <li>Recorded by Trivector / TOD meter</li>
+        <li>Measured in KVA (apparent power)</li>
+        <li>Peak 30-min demand in billing period</li>
+        <li>Billed even if MD not reached (minimum billing = 75% contracted demand)</li>
+        <li>Power factor incentive/penalty applies</li>
+      </ul>
+    </div>
+    <div class="card">
+      <span class="badge badge-purple">Energy Charge</span>
+      <h3>Energy Consumption</h3>
+      <ul class="eng">
+        <li>KWH — Active energy (real power)</li>
+        <li>KVARH — Reactive energy</li>
+        <li>KVAH = √(KWH² + KVARH²)</li>
+        <li>TOD meters record time-of-day slots</li>
+        <li>ABT — Deviation charge based on schedule</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2 style="margin-bottom:16px">Quick Reference Matrix</h2>
+  <div style="overflow-x:auto">
+  <table class="quick-ref">
+    <tr><th>Meter Type</th><th>Voltage</th><th>Connection</th><th>CT Required</th><th>PT Required</th><th>Accuracy</th><th>Application</th></tr>
+    <tr><td>Whole Current (LT)</td><td>415V</td><td>3φ 4-wire direct</td><td>No</td><td>No</td><td>Class 1/2</td><td>LT consumers &lt;100A</td></tr>
+    <tr><td>LTCT Meter</td><td>415V</td><td>3φ 4-wire via CT</td><td>Yes (LT CT)</td><td>No</td><td>Class 0.5/1</td><td>LT &gt;100A, HT 11kV LT side</td></tr>
+    <tr><td>HTCT 11kV</td><td>11kV</td><td>3φ 3-wire via CT+PT</td><td>Yes (HT CT)</td><td>Yes (PT)</td><td>0.5S / 0.2S</td><td>11kV consumers ≤1500KVA</td></tr>
+    <tr><td>HTCT 33kV</td><td>33kV</td><td>3φ 3-wire CT+PT</td><td>Yes</td><td>Yes</td><td>0.2S</td><td>33kV consumers 1501–5000KVA</td></tr>
+    <tr><td>ABT Meter</td><td>33/132kV</td><td>3φ 3-wire Main+Check</td><td>Yes (0.2S)</td><td>Yes (0.2)</td><td>0.2S / 0.2</td><td>Bulk supply, generators</td></tr>
+    <tr><td>TOD Meter</td><td>Any HT</td><td>CT+PT connected</td><td>Yes</td><td>Yes</td><td>0.5S</td><td>Time-of-day billing</td></tr>
+    <tr><td>Trivector Meter</td><td>Any HT</td><td>CT+PT connected</td><td>Yes</td><td>Yes</td><td>0.5S</td><td>KW + KVAR + KVA + MD</td></tr>
+    <tr><td>Traction Meter</td><td>132/25kV</td><td>1φ or 3φ special</td><td>Yes</td><td>CVT</td><td>0.5S</td><td>Railway traction feeders</td></tr>
+  </table>
+  </div>
+</div>
+<!-- ===== METERING TYPES ===== -->
+<div id="types" class="section">
+  <div class="section-title">
+    <div class="section-icon" style="background:#E8F1FB">⚡</div>
+    <div><h1>Metering Types</h1><p class="subtitle">Classification by metering scheme and billing function</p></div>
+  </div>
+
+  <div class="grid g2" style="margin-bottom:24px">
+    <div class="card" style="border-top:4px solid var(--blue)">
+      <span class="badge badge-blue">LTCT Metering</span>
+      <h3>Low Tension CT Metering</h3>
+      <p style="font-size:14px;color:var(--text2);margin-bottom:12px">Meter installed at LT (415V) side. CTs installed in LT panel. PT not required — direct voltage connection to 415V bus.</p>
+      <ul class="eng">
+        <li>CT ratio typically 100/5A or 200/5A</li>
+        <li>Direct voltage connection 240V / 415V</li>
+        <li>3-phase 4-wire balanced/unbalanced</li>
+        <li>Used for 11kV consumers with LT board metering</li>
+        <li>Multiplying Factor (MF) = CT ratio</li>
+      </ul>
+    </div>
+    <div class="card" style="border-top:4px solid var(--orange)">
+      <span class="badge badge-orange">HTCT Metering</span>
+      <h3>High Tension CT Metering</h3>
+      <p style="font-size:14px;color:var(--text2);margin-bottom:12px">Meter at HT side. Both CT and PT required. 3-phase 3-wire for 11kV/33kV systems.</p>
+      <ul class="eng">
+        <li>CT: 50/5A, 100/1A, or as designed</li>
+        <li>PT: 11000/110V or 33000/110V</li>
+        <li>MF = CT ratio × PT ratio</li>
+        <li>Accuracy class 0.5S or 0.2S mandatory</li>
+        <li>Separate metering CT cores from protection cores</li>
+      </ul>
+    </div>
+    <div class="card" style="border-top:4px solid var(--purple)">
+      <span class="badge badge-purple">TOD Metering</span>
+      <h3>Time-of-Day Metering</h3>
+      <p style="font-size:14px;color:var(--text2);margin-bottom:12px">Records energy consumption in predefined time slots. Peak / off-peak / night tariff zones.</p>
+      <ul class="eng">
+        <li>Inbuilt Real Time Clock (RTC)</li>
+        <li>Typically 6 time slots programmable</li>
+        <li>Records KWH, KVARH, KVAH per slot</li>
+        <li>Load survey / load profile storage</li>
+        <li>Optical port / RS485 communication</li>
+      </ul>
+    </div>
+    <div class="card" style="border-top:4px solid var(--green)">
+      <span class="badge badge-green">ABT Metering</span>
+      <h3>Availability Based Tariff</h3>
+      <p style="font-size:14px;color:var(--text2);margin-bottom:12px">CERC mandate for bulk consumers ≥1MW and all generators. Frequency-linked UI (Unscheduled Interchange) charges.</p>
+      <ul class="eng">
+        <li>Main meter + Check meter mandatory</li>
+        <li>Standby meter optional (recommended)</li>
+        <li>Records energy every 15 minutes</li>
+        <li>UI (deviation) accounted separately</li>
+        <li>CT class 0.2S, PT class 0.2 mandatory</li>
+        <li>Sealed by STU (State Transmission Utility)</li>
+      </ul>
+    </div>
+    <div class="card" style="border-top:4px solid var(--teal)">
+      <span class="badge badge-teal">Trivector Meter</span>
+      <h3>Trivector / MD Meter</h3>
+      <p style="font-size:14px;color:var(--text2);margin-bottom:12px">Measures three quantities: KW (active), KVAR (reactive), KVA (apparent). Records maximum demand.</p>
+      <ul class="eng">
+        <li>Thermal demand indicator (30-min integration)</li>
+        <li>KWH, KVARH, KVAH registration</li>
+        <li>Power factor = KWH / KVAH</li>
+        <li>MD printed on demand slip</li>
+        <li>Used for two-part tariff billing</li>
+      </ul>
+    </div>
+    <div class="card" style="border-top:4px solid var(--red)">
+      <span class="badge badge-red">Whole Current</span>
+      <h3>Whole Current Meter (LT Direct)</h3>
+      <p style="font-size:14px;color:var(--text2);margin-bottom:12px">No CT or PT. Current flows directly through meter current coils. Used for small LT consumers.</p>
+      <ul class="eng">
+        <li>Rating: 5A, 10A, 20A, 40A, 60A</li>
+        <li>Single phase or 3-phase 4-wire</li>
+        <li>No MF required (MF = 1)</li>
+        <li>Class 1 or Class 2 accuracy</li>
+        <li>Direct connection up to 100A</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2 style="margin-bottom:16px">Energy Registration Quantities</h2>
+  <div class="grid g3">
+    <div class="card">
+      <h4>Active Energy (KWH)</h4>
+      <div class="formula">P = V·I·cos φ <span class="hi">[Watts]</span><br>KWH = Σ P·dt</div>
+      <p style="font-size:13px;color:var(--text2)">Real power doing useful work. Drives KWH disc forward on induction type meters.</p>
+    </div>
+    <div class="card">
+      <h4>Reactive Energy (KVARH)</h4>
+      <div class="formula">Q = V·I·sin φ <span class="hi">[VAR]</span><br>KVARH = Σ Q·dt</div>
+      <p style="font-size:13px;color:var(--text2)">Magnetising current component. High KVAR = low power factor = penalty charges.</p>
+    </div>
+    <div class="card">
+      <h4>Apparent Energy (KVAH)</h4>
+      <div class="formula">KVAH = <span class="eq">√</span>(KWH² + KVARH²)</div>
+      <p style="font-size:13px;color:var(--text2)">Total energy drawn from system. ABT billing increasingly on KVAH basis.</p>
+    </div>
+  </div>
+</div>
+<!-- ===== VOLTAGE CONFIG ===== -->
+<div id="voltage" class="section">
+  <div class="section-title">
+    <div class="section-icon" style="background:#FFF3E0">🔌</div>
+    <div><h1>Voltage Configuration</h1><p class="subtitle">CT & PT ratios, burden, accuracy class by voltage level</p></div>
+  </div>
+
+  <div class="accord">
+    <div class="accord-hdr" onclick="toggleAccord(this)"><span>11 kV System — HTCT Consumer</span><span class="arrow">▼</span></div>
+    <div class="accord-body">
+      <div class="grid g2">
+        <div>
+          <h4>Current Transformer (CT)</h4>
+          <table>
+            <tr><th>Parameter</th><th>Value</th></tr>
+            <tr><td>System Voltage</td><td>11 kV (12 kV rated)</td></tr>
+            <tr><td>Ratio</td><td>50/5A, 100/5A, 200/5A (site-specific)</td></tr>
+            <tr><td>Accuracy Class</td><td>0.5S (metering) / 5P20 (protection)</td></tr>
+            <tr><td>Burden</td><td>5 VA (metering core)</td></tr>
+            <tr><td>Multi-core</td><td>2-core: 1 metering + 1 protection</td></tr>
+            <tr><td>IS Standard</td><td>IS 2705 Part I & II</td></tr>
+            <tr><td>ALF (Accuracy Limit Factor)</td><td>5 (metering), 20 (protection)</td></tr>
+          </table>
+        </div>
+        <div>
+          <h4>Potential Transformer (PT)</h4>
+          <table>
+            <tr><th>Parameter</th><th>Value</th></tr>
+            <tr><td>Ratio</td><td>11000/√3 : 110/√3 V (phase-earth)</td></tr>
+            <tr><td>Or simplified</td><td>11000/110 V (line-line)</td></tr>
+            <tr><td>Accuracy Class</td><td>0.5 (metering) / 3P (protection)</td></tr>
+            <tr><td>Burden</td><td>10–50 VA per phase</td></tr>
+            <tr><td>Type</td><td>Electromagnetic PT (3-limb or 5-limb core)</td></tr>
+            <tr><td>IS Standard</td><td>IS 3156</td></tr>
+            <tr><td>Fuse Protection</td><td>HRC fuse on primary, HRC/rewireable on secondary</td></tr>
+          </table>
+        </div>
+      </div>
+      <div class="info-box" style="margin-top:12px">
+        <strong>Multiplying Factor (MF):</strong> MF = CT ratio × PT ratio × meter constant<br>
+        Example: CT 50/5, PT 11000/110 → MF = 10 × 100 = 1000 (reading in kWh × 1000 = actual kWh)
+      </div>
+      <div class="formula">MF = <span class="hi">(CT Primary / CT Secondary)</span> × <span class="eq">(PT Primary / PT Secondary)</span></div>
+    </div>
+  </div>
+
+  <div class="accord">
+    <div class="accord-hdr" onclick="toggleAccord(this)"><span>33 kV System — Bulk Consumer / ABT</span><span class="arrow">▼</span></div>
+    <div class="accord-body">
+      <div class="grid g2">
+        <div>
+          <h4>CT Requirements (33kV)</h4>
+          <table>
+            <tr><th>Parameter</th><th>Value</th></tr>
+            <tr><td>System Voltage</td><td>33 kV (36 kV rated)</td></tr>
+            <tr><td>Accuracy Class</td><td>0.2S (mandatory for ABT)</td></tr>
+            <tr><td>Cores required</td><td>Min 3: metering (0.2S) + check (0.2S) + protection (5P20)</td></tr>
+            <tr><td>Burden (metering)</td><td>5 VA or as calculated</td></tr>
+            <tr><td>Knee Point Voltage</td><td>Kpv ≥ 2 × ALF × (RCT + Rburden)</td></tr>
+            <tr><td>CT saturation check</td><td>Kpv must be above saturation for fault current</td></tr>
+          </table>
+        </div>
+        <div>
+          <h4>PT Requirements (33kV)</h4>
+          <table>
+            <tr><th>Parameter</th><th>Value</th></tr>
+            <tr><td>Ratio</td><td>33000/√3 : 110/√3 V</td></tr>
+            <tr><td>Accuracy Class</td><td>0.2 (metering) / 3P (protection)</td></tr>
+            <tr><td>Winding config</td><td>Star-Star (metering) + open delta (protection)</td></tr>
+            <tr><td>5-limb core</td><td>Required for zero-sequence voltage measurement</td></tr>
+            <tr><td>Fuse protection</td><td>HRC on primary; monitoring required</td></tr>
+            <tr><td>IS Standard</td><td>IS 3156 Part I</td></tr>
+          </table>
+        </div>
+      </div>
+      <div class="warn-box">
+        <strong>ABT Mandatory:</strong> Main + Check meter both class 0.2S CT / 0.2 PT. Standby meter recommended. All sealed by STU/SLDC before energisation.
+      </div>
+    </div>
+  </div>
+
+  <div class="accord">
+    <div class="accord-hdr" onclick="toggleAccord(this)"><span>132 / 220 kV EHV System — CVT & Traction</span><span class="arrow">▼</span></div>
+    <div class="accord-body">
+      <div class="grid g2">
+        <div>
+          <h4>Capacitor Voltage Transformer (CVT)</h4>
+          <p style="font-size:14px;margin-bottom:10px">Electromagnetic PT impractical above 33kV due to insulation cost. CVT uses capacitor divider + electromagnetic unit.</p>
+          <ul class="eng">
+            <li>Primary: capacitor stack (C1, C2) in series</li>
+            <li>Intermediate voltage extracted at junction (~5–15kV)</li>
+            <li>Electromagnetic unit steps down to 110V</li>
+            <li>Burden: 25–100 VA typical</li>
+            <li>Ferroresonance suppression damper required</li>
+            <li>Also used for PLC (Power Line Carrier) coupling</li>
+          </ul>
+        </div>
+        <div>
+          <h4>132kV CT Particulars (Actual — APSEB record)</h4>
+          <table>
+            <tr><th>Parameter</th><th>Actual Value</th></tr>
+            <tr><td>Manufacturer</td><td>ASHMOR, Type WP</td></tr>
+            <tr><td>CT Ratio</td><td>50/5A</td></tr>
+            <tr><td>Burden</td><td>5 VA</td></tr>
+            <tr><td>Accuracy Class</td><td>Class 1.0</td></tr>
+            <tr><td>IS Standard</td><td>IS 2705-1981</td></tr>
+            <tr><td>Existing Meter</td><td>SECURE, Model APEO645</td></tr>
+            <tr><td>Meter CT ratio</td><td>100/1A</td></tr>
+            <tr><td>Meter PT ratio</td><td>132kV / 110V</td></tr>
+            <tr><td>Meter class</td><td>0.5S</td></tr>
+          </table>
+        </div>
+      </div>
+      <div class="info-box">
+        <strong>CVT vs Electromagnetic PT:</strong> CVTs are standard above 33kV. They have slightly higher phase angle error at light loads. The electromagnetic unit inside CVT must be rated accurately (class 0.2 for metering).
+      </div>
+    </div>
+  </div>
+
+  <div class="accord">
+    <div class="accord-hdr" onclick="toggleAccord(this)"><span>CT Burden Calculation & Knee Point Voltage</span><span class="arrow">▼</span></div>
+    <div class="accord-body">
+      <div class="grid g2">
+        <div>
+          <h4>Burden Calculation</h4>
+          <div class="formula">
+            Burden (VA) = I²sec × <span class="hi">R_total</span><br>
+            R_total = R_CT_secondary + R_lead + R_meter<br><br>
+            <span class="eq">At 5A secondary:</span><br>
+            Burden = 25 × R_total (VA)
+          </div>
+          <ul class="eng">
+            <li>Lead resistance: ρL/A (copper, 2-way)</li>
+            <li>Meter burden: typically 0.5–2 VA</li>
+            <li>Total must be ≤ rated CT burden</li>
+            <li>1A secondary → less lead loss, preferred for long runs</li>
+          </ul>
+        </div>
+        <div>
+          <h4>Knee Point Voltage (Kpv)</h4>
+          <div class="formula">
+            Kpv ≥ <span class="hi">ALF</span> × I_rated × <span class="eq">(RCT + Rburden)</span><br><br>
+            For 5P20 CT, ALF=20:<br>
+            Kpv ≥ 20 × 5 × (RCT + Rburden)<br>
+            Example: RCT=1Ω, Rb=1Ω → Kpv ≥ 200V
+          </div>
+          <div class="info-box">
+            <strong>Polarity Test:</strong> Battery + → P1 (primary), Galvanometer deflects forward at S1 (secondary). P1-P2 primary; S1-S2 secondary. Dot convention: current IN at P1, current OUT at S1.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- ===== EQUIPMENT ===== -->
+<div id="equipment" class="section">
+  <div class="section-title">
+    <div class="section-icon" style="background:#F3E8FF">🔧</div>
+    <div><h1>Equipment</h1><p class="subtitle">CT, PT, meters, test blocks, testing kits — specifications and construction</p></div>
+  </div>
+
+  <div class="accord">
+    <div class="accord-hdr" onclick="toggleAccord(this)"><span>Current Transformer (CT) — Construction & Types</span><span class="arrow">▼</span></div>
+    <div class="accord-body">
+      <div class="grid g3" style="margin-bottom:14px">
+        <div class="card" style="padding:16px">
+          <span class="badge badge-blue">Bar Type CT</span>
+          <p style="font-size:13px;margin-top:6px">Single-turn primary (busbar passes through). Used for very high currents. Simple construction, high ratio.</p>
+        </div>
+        <div class="card" style="padding:16px">
+          <span class="badge badge-orange">Wound Type CT</span>
+          <p style="font-size:13px;margin-top:6px">Multi-turn primary winding. Used for lower ratios (e.g., 50/5A). Better accuracy at low currents.</p>
+        </div>
+        <div class="card" style="padding:16px">
+          <span class="badge badge-purple">Ring Type CT</span>
+          <p style="font-size:13px;margin-top:6px">Toroidal core. Cable passes through. Used for earth fault detection (core balance / Holmgreen). Zero-sequence detection.</p>
+        </div>
+      </div>
+      <div class="two-col">
+        <div>
+          <h4>Multi-Core CT Construction</h4>
+          <ul class="eng">
+            <li>Core 1: Metering (class 0.2S or 0.5S, low burden)</li>
+            <li>Core 2: Protection (class 5P10 or 5P20, high Kpv)</li>
+            <li>Core 3: Differential protection (PS class, low Rct)</li>
+            <li>Primary: shared for all cores</li>
+            <li>Each core has independent secondary terminals</li>
+          </ul>
+          <div class="warn-box" style="margin-top:10px">
+            <strong>NEVER open circuit a CT secondary</strong> while primary carries current. High voltage develops across open secondary — potentially lethal and destructive.
+          </div>
+        </div>
+        <div>
+          <h4>CT Accuracy Classes (IS 2705)</h4>
+          <table>
+            <tr><th>Class</th><th>Ratio Error</th><th>Phase Error</th><th>Use</th></tr>
+            <tr><td>0.1</td><td>±0.1%</td><td>±5 min</td><td>Precision lab</td></tr>
+            <tr><td>0.2</td><td>±0.2%</td><td>±10 min</td><td>Reference</td></tr>
+            <tr><td>0.2S</td><td>±0.2%@5A, ±0.75%@0.05A</td><td>±10 min</td><td>ABT metering</td></tr>
+            <tr><td>0.5</td><td>±0.5%</td><td>±30 min</td><td>Standard metering</td></tr>
+            <tr><td>0.5S</td><td>±0.5%@5A, ±1.5%@0.05A</td><td>±30 min</td><td>HT metering</td></tr>
+            <tr><td>1.0</td><td>±1.0%</td><td>±60 min</td><td>General use</td></tr>
+            <tr><td>5P20</td><td>±1.0% composite</td><td>—</td><td>Protection</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="accord">
+    <div class="accord-hdr" onclick="toggleAccord(this)"><span>Potential Transformer (PT/VT) — Types & Specifications</span><span class="arrow">▼</span></div>
+    <div class="accord-body">
+      <div class="two-col">
+        <div>
+          <h4>3-Limb vs 5-Limb Core</h4>
+          <ul class="eng">
+            <li><strong>3-Limb:</strong> Cannot carry zero-sequence flux (no return path). Used where earth fault voltage measurement not needed.</li>
+            <li><strong>5-Limb:</strong> Two outer limbs provide zero-sequence flux path. Required for earth fault (residual voltage) detection via open-delta winding.</li>
+            <li><strong>Open delta winding:</strong> 3rd winding in open-delta. Healthy condition: output ≈ 0V. Earth fault: output rises to ≈ 110V (residual).</li>
+          </ul>
+          <div class="formula">
+            PT Ratio = <span class="hi">V_primary / V_secondary</span><br>
+            11kV PT: <span class="eq">11000/√3 : 110/√3</span> = 100:1 per phase<br>
+            Or L-L: 11000:110 = 100:1
+          </div>
+        </div>
+        <div>
+          <h4>PT Accuracy Classes (IS 3156)</h4>
+          <table>
+            <tr><th>Class</th><th>Voltage Error</th><th>Phase Error</th></tr>
+            <tr><td>0.1</td><td>±0.1%</td><td>±5 min</td></tr>
+            <tr><td>0.2</td><td>±0.2%</td><td>±10 min</td></tr>
+            <tr><td>0.5</td><td>±0.5%</td><td>±20 min</td></tr>
+            <tr><td>1.0</td><td>±1.0%</td><td>±40 min</td></tr>
+            <tr><td>3P</td><td>±3.0%</td><td>±120 min</td></tr>
+          </table>
+          <div class="info-box" style="margin-top:10px">
+            <strong>PT Polarity Test:</strong> Connect 1.5V battery to primary (A–N). Meter positive deflection at secondary (a–n). Mark polarity dots at A and a.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="accord">
+    <div class="accord-hdr" onclick="toggleAccord(this)"><span>Test Terminal Block (TTB) — Test Block Operation</span><span class="arrow">▼</span></div>
+    <div class="accord-body">
+      <p style="font-size:14px;margin-bottom:12px">TTB (Test Terminal Block) enables meter testing without disconnecting CT/PT circuits. Has three terminal types:</p>
+      <div class="grid g3" style="margin-bottom:14px">
+        <div class="card" style="padding:16px;border-top:3px solid var(--blue)">
+          <span class="badge badge-blue">M — Metering</span>
+          <p style="font-size:13px;margin-top:6px">Connects to meter terminals. Isolating links allow meter to be isolated from circuit for testing.</p>
+        </div>
+        <div class="card" style="padding:16px;border-top:3px solid var(--orange)">
+          <span class="badge badge-orange">A — Ammeter</span>
+          <p style="font-size:13px;margin-top:6px">CT secondary circuit passes through. Short-circuit switch allows CT secondary to be shorted before opening meter circuit.</p>
+        </div>
+        <div class="card" style="padding:16px;border-top:3px solid var(--green)">
+          <span class="badge badge-green">L — Link</span>
+          <p style="font-size:13px;margin-top:6px">Voltage circuit links. Voltage can be isolated from meter without interrupting PT secondary circuit.</p>
+        </div>
+      </div>
+      <h4 style="margin-bottom:10px">TTB Operation Procedure (Meter Replacement)</h4>
+      <div class="step"><div class="step-num">1</div><div class="step-body"><h4>Short CT Secondaries</h4><p>Use shorting screws on TTB 'A' terminals. Short all phase CT secondaries before any disconnection.</p></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><h4>Isolate Voltage Links</h4><p>Remove 'L' (link) connections on TTB. Voltage now isolated from meter safely.</p></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body"><h4>Open Meter Links</h4><p>Open 'M' isolating links on TTB. Meter now fully isolated — can be replaced.</p></div></div>
+      <div class="step"><div class="step-num">4</div><div class="step-body"><h4>Replace Meter / Test</h4><p>Connect test meter or new meter. Apply test currents/voltages via TTB test terminals.</p></div></div>
+      <div class="step"><div class="step-num">5</div><div class="step-body"><h4>Restore in Reverse</h4><p>Close M links → restore L voltage links → remove CT shorts. Verify polarity before restoring.</p></div></div>
+      <div class="danger-box"><strong>Safety:</strong> Never remove CT shorts before closing M links. Never open CT secondary without shorting first.</div>
+    </div>
+  </div>
+
+  <div class="accord">
+    <div class="accord-hdr" onclick="toggleAccord(this)"><span>Meter Sealing — 4 Sealing Points</span><span class="arrow">▼</span></div>
+    <div class="accord-body">
+      <div class="grid g2">
+        <div>
+          <ul class="eng">
+            <li><strong>Seal Point 1:</strong> Top cover seal — prevents access to meter internals (disc, magnets, shunt)</li>
+            <li><strong>Seal Point 2:</strong> Inspection cover seal — access flap for reading without seal breaking</li>
+            <li><strong>Seal Point 3:</strong> Secondary terminal box seal — CT/PT secondary connections inside</li>
+            <li><strong>Seal Point 4:</strong> Cable entry seal — gland/conduit entry to meter enclosure</li>
+          </ul>
+        </div>
+        <div>
+          <div class="success-box">
+            <strong>Who Seals:</strong><br>
+            DISCOM AE/ADE seals after installation verification. STU/SLDC seals ABT meters. Meter must be sealed before commissioning. Broken seal = prima facie evidence of tampering.
+          </div>
+          <ul class="eng" style="margin-top:10px">
+            <li>Sealing wire: lead seal with authority stamp</li>
+            <li>Seal register maintained at SDOA/division office</li>
+            <li>Meter box external lock also required</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="accord">
+    <div class="accord-hdr" onclick="toggleAccord(this)"><span>Summation CTs & Z-Connection</span><span class="arrow">▼</span></div>
+    <div class="accord-body">
+      <div class="two-col">
+        <div>
+          <h4>Summation CT</h4>
+          <p style="font-size:14px;margin-bottom:10px">Combines currents from multiple feeders into single meter. Used where feeder summation required (e.g., single billing point for multiple transformers).</p>
+          <ul class="eng">
+            <li>Multiple primaries wound on single toroid core</li>
+            <li>Each primary = individual feeder CT secondary</li>
+            <li>Output (secondary) feeds single energy meter</li>
+            <li>Ratio = sum of individual turns</li>
+            <li>Accuracy affected by phase diversity between feeders</li>
+          </ul>
+          <div class="info-box">
+            FACOR single-point metering arrangement uses summation CTs for multiple transformer feeders feeding a common bus.
+          </div>
+        </div>
+        <div>
+          <h4>Z-Connection of CTs</h4>
+          <p style="font-size:14px;margin-bottom:10px">Used to obtain 3-phase 4-wire metering from 3-wire CT installation. Provides artificial neutral using CT secondaries.</p>
+          <div class="formula">
+            Z-connection: Two CTs (R and B phases)<br>
+            <span class="hi">I_Y</span> = -(I_R + I_B) by Kirchhoff's law<br>
+            Third element current derived, not measured<br>
+            Used when only 2 CTs available in 3-wire system
+          </div>
+          <ul class="eng">
+            <li>Reduces CT count from 3 to 2</li>
+            <li>Acceptable for balanced/near-balanced loads</li>
+            <li>Not suitable for unbalanced industrial loads</li>
+            <li>Also used in some 3-element meter arrangements</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- ===== TERMINAL CONFIGURATIONS ===== -->
+<div id="terminal" class="section">
+  <div class="section-title">
+    <div class="section-icon" style="background:#E0F7FA">🔗</div>
+    <div><h1>Terminal Configurations</h1><p class="subtitle">18 standard terminal configurations for energy meters (IS 14697 / CEA)</p></div>
+  </div>
+
+  <div class="info-box" style="margin-bottom:20px">
+    <strong>18 Terminal Configurations</strong> cover all combinations of: AC current (direct/CT), AC voltage (direct/PT), active/reactive power, single-phase/3-phase-3-wire/3-phase-4-wire balanced/unbalanced, power factor, and frequency.
+  </div>
+
+  <h3 style="margin-bottom:12px">AC Current Measurement</h3>
+  <div class="grid g3" style="margin-bottom:20px">
+    <div class="card" style="border-top:3px solid var(--blue)">
+      <span class="badge badge-blue">Config 1</span>
+      <h4>AC Current — Direct</h4>
+      <p style="font-size:13px;color:var(--text2)">Current flows directly through meter current terminals. Single phase. No CT. Rating: 5A, 10A, 20A, 40A.</p>
+    </div>
+    <div class="card" style="border-top:3px solid var(--orange)">
+      <span class="badge badge-orange">Config 2</span>
+      <h4>AC Current — Transformer Connected</h4>
+      <p style="font-size:13px;color:var(--text2)">Current via CT. Secondary (5A or 1A) to meter current coil. Polarity: P1→S1. MF = CT ratio.</p>
+    </div>
+  </div>
+
+  <h3 style="margin-bottom:12px">AC Voltage Measurement</h3>
+  <div class="grid g3" style="margin-bottom:20px">
+    <div class="card" style="border-top:3px solid var(--green)">
+      <span class="badge badge-green">Config 3</span>
+      <h4>AC Voltage — Direct</h4>
+      <p style="font-size:13px;color:var(--text2)">LT direct connection to voltage coil. 240V (phase-neutral) or 415V (phase-phase). No PT required.</p>
+    </div>
+    <div class="card" style="border-top:3px solid var(--purple)">
+      <span class="badge badge-purple">Config 4</span>
+      <h4>AC Voltage — Transformer Connected</h4>
+      <p style="font-size:13px;color:var(--text2)">Via PT. Secondary 110V (phase-phase) or 63.5V (phase-neutral) to meter voltage coil. MF includes PT ratio.</p>
+    </div>
+  </div>
+
+  <h3 style="margin-bottom:12px">Active Power (KWH) Configurations</h3>
+  <div class="grid g3" style="margin-bottom:20px">
+    <div class="card" style="border-top:3px solid var(--red)">
+      <span class="badge badge-red">Config 5</span>
+      <h4>Active Power — 1-Phase (Direct)</h4>
+      <p style="font-size:13px;color:var(--text2)">P = V·I·cos φ. Single element meter. Direct current and voltage connections.</p>
+    </div>
+    <div class="card" style="border-top:3px solid var(--red)">
+      <span class="badge badge-red">Config 6</span>
+      <h4>Active Power — 1-Phase (CT+PT)</h4>
+      <p style="font-size:13px;color:var(--text2)">As Config 5 but via instrument transformers. MF = CT ratio × PT ratio.</p>
+    </div>
+    <div class="card" style="border-top:3px solid var(--orange)">
+      <span class="badge badge-orange">Config 7</span>
+      <h4>Active Power — 3φ 3-Wire (2 Element)</h4>
+      <p style="font-size:13px;color:var(--text2)">2-wattmeter method. Uses R-phase and B-phase elements. Y-phase CT not required. Accurate for all loads.</p>
+      <div class="formula" style="font-size:11px">P = V_RY·I_R·cosφ_RY + V_BY·I_B·cosφ_BY</div>
+    </div>
+    <div class="card" style="border-top:3px solid var(--orange)">
+      <span class="badge badge-orange">Config 8</span>
+      <h4>Active Power — 3φ 3-Wire (3 Element)</h4>
+      <p style="font-size:13px;color:var(--text2)">3 elements, 3 CTs. More accurate for unbalanced systems. Summation gives total active power.</p>
+    </div>
+    <div class="card" style="border-top:3px solid var(--teal)">
+      <span class="badge badge-teal">Config 9</span>
+      <h4>Active Power — 3φ 4-Wire Balanced</h4>
+      <p style="font-size:13px;color:var(--text2)">1 element × 3 = single element with neutral return. Only valid for perfectly balanced 3-phase loads.</p>
+    </div>
+    <div class="card" style="border-top:3px solid var(--teal)">
+      <span class="badge badge-teal">Config 10</span>
+      <h4>Active Power — 3φ 4-Wire Unbalanced</h4>
+      <p style="font-size:13px;color:var(--text2)">3-element meter with neutral. R+Y+B elements independently measure each phase. Required for unbalanced LT loads.</p>
+    </div>
+  </div>
+
+  <h3 style="margin-bottom:12px">Reactive Power (KVARH) Configurations</h3>
+  <div class="grid g3" style="margin-bottom:20px">
+    <div class="card" style="border-top:3px solid var(--yellow)">
+      <span class="badge badge-yellow">Config 11</span>
+      <h4>Reactive Power — 1-Phase</h4>
+      <p style="font-size:13px;color:var(--text2)">Q = V·I·sin φ. Voltage circuit shifted 90° internally. Phase-shifted current element drives disc in lag direction.</p>
+    </div>
+    <div class="card" style="border-top:3px solid var(--yellow)">
+      <span class="badge badge-yellow">Config 12</span>
+      <h4>Reactive Power — 3φ 3-Wire</h4>
+      <p style="font-size:13px;color:var(--text2)">90° phase shift method. Cross-connection of voltages to current elements. Standard for 3-wire systems.</p>
+    </div>
+    <div class="card" style="border-top:3px solid var(--yellow)">
+      <span class="badge badge-yellow">Config 13</span>
+      <h4>Reactive Power — 3φ 4-Wire Balanced</h4>
+      <p style="font-size:13px;color:var(--text2)">Single element reactive meter for balanced LT system. Not suitable for unbalanced loads.</p>
+    </div>
+    <div class="card" style="border-top:3px solid var(--yellow)">
+      <span class="badge badge-yellow">Config 14</span>
+      <h4>Reactive Power — 3φ 4-Wire Unbalanced</h4>
+      <p style="font-size:13px;color:var(--text2)">3-element reactive with neutral. Each phase independently. Required for mixed single-phase/3-phase loads.</p>
+    </div>
+  </div>
+
+  <h3 style="margin-bottom:12px">Derived Quantities</h3>
+  <div class="grid g3" style="margin-bottom:20px">
+    <div class="card" style="border-top:3px solid var(--gray,#8E8E93)">
+      <span class="badge badge-gray">Config 15</span>
+      <h4>Active + Reactive — Combined</h4>
+      <p style="font-size:13px;color:var(--text2)">Trivector meter. Simultaneously records KWH and KVARH. Modern static meters compute KVAH internally.</p>
+    </div>
+    <div class="card" style="border-top:3px solid var(--gray,#8E8E93)">
+      <span class="badge badge-gray">Config 16</span>
+      <h4>Power Factor Meter</h4>
+      <p style="font-size:13px;color:var(--text2)">Measures cos φ directly. Crossed-coil moving element. Indicates unity at centre scale. Lagging/leading graduation.</p>
+    </div>
+    <div class="card" style="border-top:3px solid var(--gray,#8E8E93)">
+      <span class="badge badge-gray">Config 17</span>
+      <h4>Frequency Meter</h4>
+      <p style="font-size:13px;color:var(--text2)">Vibrating reed or resonance type. Connected to voltage bus. Reads 50 Hz nominal. Used in grid frequency monitoring (ABT).</p>
+    </div>
+    <div class="card" style="border-top:3px solid var(--gray,#8E8E93)">
+      <span class="badge badge-gray">Config 18</span>
+      <h4>Maximum Demand Indicator</h4>
+      <p style="font-size:13px;color:var(--text2)">Thermal or electronic integration over 30-min period. Pointer held at peak; reset monthly by DISCOM staff.</p>
+    </div>
+  </div>
+
+  <h3 style="margin-bottom:12px">Selector Switch Connections</h3>
+  <div class="grid g2">
+    <div class="card">
+      <h4>Ammeter Selector Switch</h4>
+      <p style="font-size:14px;color:var(--text2);margin-bottom:8px">5-position rotary switch: OFF, R, Y, B, N. Routes selected phase CT secondary to panel ammeter.</p>
+      <div class="warn-box">Switch has make-before-break contacts to ensure CT secondary never open-circuited during phase selection.</div>
+    </div>
+    <div class="card">
+      <h4>Voltmeter Selector Switch</h4>
+      <p style="font-size:14px;color:var(--text2);margin-bottom:8px">7-position rotary: OFF, RY, YB, BR, RN, YN, BN. Routes selected voltage to panel voltmeter.</p>
+      <div class="info-box">Break-before-make acceptable here — no danger from open PT secondary. High impedance voltmeter load.</div>
+    </div>
+  </div>
+</div>
+<!-- ===== SCHEMES & SLD ===== -->
+<div id="schemes" class="section">
+  <div class="section-title">
+    <div class="section-icon" style="background:#E8F8EC">📐</div>
+    <div><h1>Metering Schemes &amp; SLDs</h1><p class="subtitle">Single-line diagrams for HTCT, LTCT, ABT, and Traction metering</p></div>
+  </div>
+
+  <!-- SLD 1: 11kV HTCT Consumer -->
+  <div class="svgwrap">
+    <h3>11kV HTCT Consumer Metering — Single Line Diagram</h3>
+    <svg viewBox="0 0 900 380" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-height:380px">
+      <defs>
+        <marker id="arr" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#333"/></marker>
+        <marker id="arrR" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#e74c3c"/></marker>
+        <marker id="arrB" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#2980b9"/></marker>
+      </defs>
+      <!-- 11kV Bus -->
+      <rect x="20" y="30" width="860" height="14" rx="3" fill="#2C3E50"/>
+      <text x="440" y="24" font-size="13" font-weight="600" text-anchor="middle" fill="#2C3E50">11 kV BUS</text>
+      <!-- VT/PT block -->
+      <line x1="80" y1="44" x2="80" y2="90" stroke="#e67e22" stroke-width="2.5"/>
+      <ellipse cx="80" cy="100" rx="18" ry="10" fill="none" stroke="#e67e22" stroke-width="2"/>
+      <ellipse cx="80" cy="118" rx="18" ry="10" fill="none" stroke="#e67e22" stroke-width="2"/>
+      <line x1="80" y1="128" x2="80" y2="160" stroke="#e67e22" stroke-width="2.5"/>
+      <text x="108" y="112" font-size="11" fill="#e67e22" font-weight="600">PT</text>
+      <text x="108" y="124" font-size="10" fill="#888">11kV/110V</text>
+      <!-- PT fuse -->
+      <rect x="68" y="84" width="24" height="6" rx="2" fill="#e74c3c"/>
+      <text x="96" y="90" font-size="9" fill="#e74c3c">HRC Fuse</text>
+      <!-- Feeder CB -->
+      <line x1="400" y1="44" x2="400" y2="80" stroke="#333" stroke-width="3"/>
+      <rect x="380" y="80" width="40" height="26" rx="4" fill="none" stroke="#2C3E50" stroke-width="2.5"/>
+      <text x="400" y="97" font-size="11" text-anchor="middle" font-weight="700" fill="#2C3E50">CB</text>
+      <line x1="400" y1="106" x2="400" y2="140" stroke="#333" stroke-width="3"/>
+      <!-- Isolator -->
+      <line x1="400" y1="140" x2="390" y2="155" stroke="#333" stroke-width="2.5"/>
+      <line x1="400" y1="140" x2="410" y2="155" stroke="#333" stroke-width="0.5" stroke-dasharray="4,2"/>
+      <text x="420" y="152" font-size="10" fill="#888">Isolator</text>
+      <line x1="400" y1="155" x2="400" y2="180" stroke="#333" stroke-width="2.5"/>
+      <!-- CT symbol -->
+      <ellipse cx="400" cy="195" rx="22" ry="12" fill="none" stroke="#2980b9" stroke-width="2.5"/>
+      <ellipse cx="400" cy="215" rx="22" ry="12" fill="none" stroke="#2980b9" stroke-width="2.5"/>
+      <text x="432" y="198" font-size="10" fill="#2980b9" font-weight="600">CT</text>
+      <text x="432" y="212" font-size="9" fill="#888">50/5A 0.5S</text>
+      <line x1="400" y1="227" x2="400" y2="270" stroke="#333" stroke-width="3"/>
+      <!-- Consumer Transformer -->
+      <ellipse cx="400" cy="282" rx="26" ry="14" fill="none" stroke="#27ae60" stroke-width="2.5"/>
+      <ellipse cx="400" cy="308" rx="26" ry="14" fill="none" stroke="#27ae60" stroke-width="2.5"/>
+      <text x="436" y="292" font-size="10" fill="#27ae60" font-weight="600">TX</text>
+      <text x="436" y="306" font-size="9" fill="#888">DYn11</text>
+      <line x1="400" y1="322" x2="400" y2="355" stroke="#333" stroke-width="3"/>
+      <rect x="360" y="350" width="80" height="22" rx="4" fill="#F2F2F7" stroke="#D2D2D7" stroke-width="1.5"/>
+      <text x="400" y="365" font-size="11" text-anchor="middle" fill="#333" font-weight="600">415V LV Panel</text>
+      <!-- CT Secondary to Meter -->
+      <line x1="422" y1="207" x2="600" y2="207" stroke="#2980b9" stroke-width="1.5" stroke-dasharray="6,3"/>
+      <line x1="422" y1="221" x2="600" y2="221" stroke="#2980b9" stroke-width="1.5" stroke-dasharray="6,3"/>
+      <!-- PT Secondary to Meter -->
+      <line x1="98" y1="155" x2="600" y2="155" stroke="#e67e22" stroke-width="1.5" stroke-dasharray="6,3"/>
+      <!-- Meter box -->
+      <rect x="600" y="130" width="160" height="130" rx="10" fill="#F8F8F8" stroke="#2C3E50" stroke-width="2"/>
+      <text x="680" y="158" font-size="12" text-anchor="middle" font-weight="700" fill="#2C3E50">ENERGY METER</text>
+      <text x="680" y="175" font-size="10" text-anchor="middle" fill="#888">Static / Trivector</text>
+      <text x="680" y="192" font-size="10" text-anchor="middle" fill="#2980b9">CT: 50/5A</text>
+      <text x="680" y="207" font-size="10" text-anchor="middle" fill="#e67e22">PT: 11kV/110V</text>
+      <text x="680" y="222" font-size="10" text-anchor="middle" fill="#27ae60">MF = 1000</text>
+      <text x="680" y="240" font-size="10" text-anchor="middle" fill="#888">Class 0.5S</text>
+      <!-- TTB box -->
+      <rect x="770" y="155" width="100" height="80" rx="8" fill="#FFF3E0" stroke="#e67e22" stroke-width="1.5"/>
+      <text x="820" y="175" font-size="11" text-anchor="middle" font-weight="700" fill="#e67e22">TTB</text>
+      <text x="820" y="192" font-size="9" text-anchor="middle" fill="#888">Test Terminal</text>
+      <text x="820" y="206" font-size="9" text-anchor="middle" fill="#888">Block</text>
+      <text x="820" y="226" font-size="9" text-anchor="middle" fill="#e67e22">M | A | L</text>
+      <line x1="760" y1="195" x2="770" y2="195" stroke="#e67e22" stroke-width="1.5" stroke-dasharray="4,2"/>
+      <!-- Labels -->
+      <text x="310" y="200" font-size="10" fill="#888" text-anchor="middle">I_secondary</text>
+      <text x="340" y="148" font-size="10" fill="#888" text-anchor="middle">V_secondary</text>
+      <!-- Earth -->
+      <line x1="400" y1="355" x2="400" y2="370" stroke="#333" stroke-width="2"/>
+      <line x1="388" y1="370" x2="412" y2="370" stroke="#333" stroke-width="2.5"/>
+      <line x1="392" y1="375" x2="408" y2="375" stroke="#333" stroke-width="2"/>
+      <line x1="395" y1="380" x2="405" y2="380" stroke="#333" stroke-width="1.5"/>
+    </svg>
+  </div>
+
+  <!-- SLD 2: LTCT 415V -->
+  <div class="svgwrap">
+    <h3>LTCT 415V 3-Phase 4-Wire Metering — Single Line Diagram</h3>
+    <svg viewBox="0 0 900 300" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-height:300px">
+      <!-- 415V Bus -->
+      <rect x="20" y="30" width="860" height="10" rx="2" fill="#27ae60"/>
+      <text x="50" y="24" font-size="12" font-weight="600" fill="#27ae60">415V LT BUS (R-Y-B-N)</text>
+      <!-- 3 Phase lines from bus -->
+      <line x1="200" y1="40" x2="200" y2="100" stroke="#e74c3c" stroke-width="2.5"/>
+      <line x1="300" y1="40" x2="300" y2="100" stroke="#f39c12" stroke-width="2.5"/>
+      <line x1="400" y1="40" x2="400" y2="100" stroke="#2980b9" stroke-width="2.5"/>
+      <line x1="500" y1="40" x2="500" y2="250" stroke="#27ae60" stroke-width="2" stroke-dasharray="8,3"/>
+      <!-- R Phase CT -->
+      <ellipse cx="200" cy="108" rx="18" ry="9" fill="none" stroke="#e74c3c" stroke-width="2"/>
+      <ellipse cx="200" cy="124" rx="18" ry="9" fill="none" stroke="#e74c3c" stroke-width="2"/>
+      <text x="228" y="116" font-size="10" fill="#e74c3c">R-CT</text>
+      <!-- Y Phase CT -->
+      <ellipse cx="300" cy="108" rx="18" ry="9" fill="none" stroke="#f39c12" stroke-width="2"/>
+      <ellipse cx="300" cy="124" rx="18" ry="9" fill="none" stroke="#f39c12" stroke-width="2"/>
+      <text x="328" y="116" font-size="10" fill="#f39c12">Y-CT</text>
+      <!-- B Phase CT -->
+      <ellipse cx="400" cy="108" rx="18" ry="9" fill="none" stroke="#2980b9" stroke-width="2"/>
+      <ellipse cx="400" cy="124" rx="18" ry="9" fill="none" stroke="#2980b9" stroke-width="2"/>
+      <text x="428" y="116" font-size="10" fill="#2980b9">B-CT</text>
+      <!-- Lines down -->
+      <line x1="200" y1="133" x2="200" y2="160" stroke="#e74c3c" stroke-width="2.5"/>
+      <line x1="300" y1="133" x2="300" y2="160" stroke="#f39c12" stroke-width="2.5"/>
+      <line x1="400" y1="133" x2="400" y2="160" stroke="#2980b9" stroke-width="2.5"/>
+      <!-- CT Secondary dashes to meter -->
+      <line x1="200" y1="160" x2="620" y2="160" stroke="#e74c3c" stroke-width="1.5" stroke-dasharray="5,3"/>
+      <line x1="300" y1="165" x2="620" y2="165" stroke="#f39c12" stroke-width="1.5" stroke-dasharray="5,3"/>
+      <line x1="400" y1="170" x2="620" y2="170" stroke="#2980b9" stroke-width="1.5" stroke-dasharray="5,3"/>
+      <!-- Voltage taps -->
+      <line x1="200" y1="60" x2="620" y2="60" stroke="#e74c3c" stroke-width="1" stroke-dasharray="3,4" opacity="0.6"/>
+      <line x1="300" y1="65" x2="620" y2="65" stroke="#f39c12" stroke-width="1" stroke-dasharray="3,4" opacity="0.6"/>
+      <line x1="400" y1="70" x2="620" y2="70" stroke="#2980b9" stroke-width="1" stroke-dasharray="3,4" opacity="0.6"/>
+      <line x1="500" y1="75" x2="620" y2="75" stroke="#27ae60" stroke-width="1" stroke-dasharray="3,4" opacity="0.6"/>
+      <!-- Meter box -->
+      <rect x="620" y="40" width="200" height="220" rx="10" fill="#F8F8F8" stroke="#2C3E50" stroke-width="2"/>
+      <text x="720" y="68" font-size="12" text-anchor="middle" font-weight="700" fill="#2C3E50">LTCT ENERGY METER</text>
+      <text x="720" y="86" font-size="10" text-anchor="middle" fill="#888">3-Phase 4-Wire</text>
+      <text x="720" y="104" font-size="10" text-anchor="middle" fill="#888">Static / Electronic</text>
+      <rect x="640" y="115" width="160" height="100" rx="6" fill="#fff" stroke="#D2D2D7" stroke-width="1"/>
+      <text x="720" y="134" font-size="10" text-anchor="middle" fill="#e74c3c">● R Phase Element</text>
+      <text x="720" y="151" font-size="10" text-anchor="middle" fill="#f39c12">● Y Phase Element</text>
+      <text x="720" y="168" font-size="10" text-anchor="middle" fill="#2980b9">● B Phase Element</text>
+      <text x="720" y="188" font-size="9" text-anchor="middle" fill="#888">V: 240/415V direct</text>
+      <text x="720" y="202" font-size="9" text-anchor="middle" fill="#888">I: via LT CT 100/5A</text>
+      <text x="720" y="230" font-size="11" text-anchor="middle" font-weight="700" fill="#27ae60">MF = CT ratio only</text>
+      <!-- Lines continue to load -->
+      <line x1="200" y1="160" x2="200" y2="250" stroke="#e74c3c" stroke-width="2.5"/>
+      <line x1="300" y1="165" x2="300" y2="250" stroke="#f39c12" stroke-width="2.5"/>
+      <line x1="400" y1="170" x2="400" y2="250" stroke="#2980b9" stroke-width="2.5"/>
+      <text x="300" y="275" font-size="11" text-anchor="middle" fill="#888">→ Consumer Load</text>
+    </svg>
+  </div>
+
+  <!-- SLD 3: ABT 33kV -->
+  <div class="svgwrap">
+    <h3>ABT 33kV Main + Check Metering — Single Line Diagram</h3>
+    <svg viewBox="0 0 960 350" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-height:350px">
+      <!-- 33kV Bus -->
+      <rect x="20" y="30" width="920" height="14" rx="3" fill="#8E44AD"/>
+      <text x="480" y="24" font-size="13" font-weight="600" text-anchor="middle" fill="#8E44AD">33 kV BUS</text>
+      <!-- CB -->
+      <line x1="400" y1="44" x2="400" y2="80" stroke="#333" stroke-width="3"/>
+      <rect x="378" y="80" width="44" height="24" rx="4" fill="none" stroke="#333" stroke-width="2.5"/>
+      <text x="400" y="96" text-anchor="middle" font-size="11" font-weight="700" fill="#333">CB</text>
+      <line x1="400" y1="104" x2="400" y2="135" stroke="#333" stroke-width="3"/>
+      <!-- Metering CT — 3 cores shown -->
+      <rect x="360" y="135" width="80" height="60" rx="8" fill="none" stroke="#8E44AD" stroke-width="2.5"/>
+      <text x="400" y="152" text-anchor="middle" font-size="10" font-weight="700" fill="#8E44AD">CT (3-core)</text>
+      <text x="400" y="166" text-anchor="middle" font-size="9" fill="#888">0.2S | 0.2S | 5P20</text>
+      <text x="400" y="180" text-anchor="middle" font-size="9" fill="#888">Main|Check|Prot</text>
+      <line x1="400" y1="195" x2="400" y2="230" stroke="#333" stroke-width="3"/>
+      <!-- PT 33kV — 5-limb -->
+      <line x1="120" y1="44" x2="120" y2="90" stroke="#e67e22" stroke-width="2.5"/>
+      <rect x="96" y="90" width="48" height="70" rx="8" fill="none" stroke="#e67e22" stroke-width="2"/>
+      <text x="120" y="112" text-anchor="middle" font-size="10" fill="#e67e22" font-weight="700">PT</text>
+      <text x="120" y="126" text-anchor="middle" font-size="9" fill="#888">5-limb</text>
+      <text x="120" y="140" text-anchor="middle" font-size="9" fill="#888">33kV/110V</text>
+      <text x="120" y="154" text-anchor="middle" font-size="9" fill="#888">Cl 0.2</text>
+      <line x1="120" y1="160" x2="120" y2="200" stroke="#e67e22" stroke-width="2"/>
+      <!-- PT Secondary to both meters -->
+      <line x1="144" y1="140" x2="600" y2="140" stroke="#e67e22" stroke-width="1.5" stroke-dasharray="6,3"/>
+      <line x1="700" y1="140" x2="820" y2="140" stroke="#e67e22" stroke-width="1.5" stroke-dasharray="6,3"/>
+      <!-- CT main secondary -->
+      <line x1="440" y1="160" x2="600" y2="160" stroke="#8E44AD" stroke-width="1.5" stroke-dasharray="6,3"/>
+      <text x="520" y="152" font-size="9" text-anchor="middle" fill="#8E44AD">0.2S core → Main</text>
+      <!-- CT check secondary -->
+      <line x1="440" y1="170" x2="820" y2="170" stroke="#27ae60" stroke-width="1.5" stroke-dasharray="6,3"/>
+      <text x="720" y="162" font-size="9" text-anchor="middle" fill="#27ae60">0.2S core → Check</text>
+      <!-- Main Meter -->
+      <rect x="600" y="115" width="190" height="140" rx="10" fill="#F8F8F8" stroke="#8E44AD" stroke-width="2.5"/>
+      <text x="695" y="140" text-anchor="middle" font-size="12" font-weight="700" fill="#8E44AD">MAIN METER</text>
+      <text x="695" y="158" text-anchor="middle" font-size="10" fill="#888">ABT / Static</text>
+      <text x="695" y="174" text-anchor="middle" font-size="10" fill="#8E44AD">Class 0.2S / 0.2</text>
+      <text x="695" y="192" text-anchor="middle" font-size="10" fill="#888">15-min recording</text>
+      <text x="695" y="210" text-anchor="middle" font-size="10" fill="#888">KWH + KVARH</text>
+      <text x="695" y="228" text-anchor="middle" font-size="9" fill="#27ae60">Sealed by STU/SLDC</text>
+      <!-- Check Meter -->
+      <rect x="820" y="115" width="120" height="140" rx="10" fill="#F0FFF4" stroke="#27ae60" stroke-width="2"/>
+      <text x="880" y="140" text-anchor="middle" font-size="11" font-weight="700" fill="#27ae60">CHECK</text>
+      <text x="880" y="155" text-anchor="middle" font-size="10" fill="#27ae60">METER</text>
+      <text x="880" y="175" text-anchor="middle" font-size="9" fill="#888">Class 0.2S</text>
+      <text x="880" y="192" text-anchor="middle" font-size="9" fill="#888">Independent</text>
+      <text x="880" y="209" text-anchor="middle" font-size="9" fill="#888">CT core</text>
+      <!-- Consumer transformer -->
+      <ellipse cx="400" cy="248" rx="28" ry="14" fill="none" stroke="#333" stroke-width="2"/>
+      <ellipse cx="400" cy="272" rx="28" ry="14" fill="none" stroke="#333" stroke-width="2"/>
+      <text x="438" y="256" font-size="10" fill="#333" font-weight="600">TX</text>
+      <text x="438" y="270" font-size="9" fill="#888">33/11kV</text>
+      <line x1="400" y1="286" x2="400" y2="330" stroke="#333" stroke-width="2.5"/>
+      <text x="400" y="345" font-size="11" text-anchor="middle" fill="#888">11 kV Consumer Bus</text>
+    </svg>
+  </div>
+</div>
+<!-- ===== FAULT ANALYSIS ===== -->
+<div id="fault" class="section">
+  <div class="section-title">
+    <div class="section-icon" style="background:#FFECEC">⚠️</div>
+    <div><h1>Energy Registration Fault Analysis</h1><p class="subtitle">28 cases — 12 for 3-phase 3-wire, 16 for 3-phase 4-wire meters</p></div>
+  </div>
+
+  <div class="info-box" style="margin-bottom:20px">
+    <strong>Reference:</strong> KSP Kumar manuscript, pages 43–51. All cases based on CT/PT fuse missing, polarity reversal, or lead interchange. Registration effect calculated from phasor analysis.
+  </div>
+
+  <div class="accord">
+    <div class="accord-hdr" onclick="toggleAccord(this)"><span>3-Phase 3-Wire Meter — 12 Fault Cases</span><span class="arrow">▼</span></div>
+    <div class="accord-body">
+      <p style="font-size:13px;color:var(--text2);margin-bottom:14px">Normal registration for 3φ 3-wire 2-element meter = 2·V·I·cos φ (unity PF = full registration). Effect shown as fraction of correct reading.</p>
+      <div class="grid g2">
+        <div class="fault-case">
+          <h4>Case 1 — One CT Secondary Open (No current R-phase)</h4>
+          <div class="result">Registration = <strong>50%</strong> of correct (only 1 of 2 elements active). Meter under-reads by half.</div>
+        </div>
+        <div class="fault-case">
+          <h4>Case 2 — One CT Polarity Reversed (R-phase reversed)</h4>
+          <div class="result">Element 1 drives reverse. Net registration = <strong>zero or negative</strong> depending on PF. At unity PF: registration = 0. Meter stops or reverses.</div>
+        </div>
+        <div class="fault-case">
+          <h4>Case 3 — Both CTs Polarity Reversed</h4>
+          <div class="result">Both elements reverse. Disc rotates <strong>backward</strong>. Meter reverses — energy credit to consumer (theft scenario). Registration = –100%.</div>
+        </div>
+        <div class="fault-case">
+          <h4>Case 4 — One PT Fuse Missing (R-phase voltage missing)</h4>
+          <div class="result">Element 1 loses voltage reference. Only Element 2 (B-Y) registers. Registration = <strong>50%</strong> of correct approximately.</div>
+        </div>
+        <div class="fault-case">
+          <h4>Case 5 — R & Y Phase Current Leads Interchanged</h4>
+          <div class="result">Elements see wrong phase current. Registration = <strong>cos(60°–φ) + cos(60°+φ)</strong> = cos60·cosφ only. At unity PF: ~<strong>50%</strong> registration.</div>
+        </div>
+        <div class="fault-case">
+          <h4>Case 6 — R & B Phase Current Leads Interchanged</h4>
+          <div class="result">Phasor analysis: net registration distorted. At unity PF = <strong>86.6%</strong> (cos30°). Depends on load PF angle.</div>
+        </div>
+        <div class="fault-case">
+          <h4>Case 7 — Y & B Voltage Leads Interchanged</h4>
+          <div class="result">Voltage phasors rotated. For standard 2-element connection: registration = <strong>cos(120°–φ) + cos(φ)</strong>. At unity PF ≈ <strong>50%</strong>.</div>
+        </div>
+        <div class="fault-case">
+          <h4>Case 8 — R Phase CT Missing (only B-phase CT in circuit)</h4>
+          <div class="result">Only one element functional. Registration = <strong>50%</strong> approx. Actual depends on load balance.</div>
+        </div>
+        <div class="fault-case">
+          <h4>Case 9 — R-phase CT reversed + B-phase PT fuse missing</h4>
+          <div class="result">Combined fault. Element 1 reverses, Element 2 loses V_B. Registration = <strong>near zero or negative</strong>. Severe under-registration.</div>
+        </div>
+        <div class="fault-case">
+          <h4>Case 10 — Both PT fuses missing (both voltage circuits open)</h4>
+          <div class="result">Both elements lose voltage. Meter does not register. <strong>Zero registration</strong>. Immediately apparent — no reading.</div>
+        </div>
+        <div class="fault-case">
+          <h4>Case 11 — Current circuit R&B interchanged + R CT reversed</h4>
+          <div class="result">Compound fault. Complex phasor result. Approximately <strong>–86.6%</strong> at unity PF (meter reverses at high rate).</div>
+        </div>
+        <div class="fault-case">
+          <h4>Case 12 — All CT polarities reversed + one PT fuse open</h4>
+          <div class="result">Maximum under-registration. Net registration = <strong>–50%</strong>. Both disc reversal and element loss combine.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="accord">
+    <div class="accord-hdr" onclick="toggleAccord(this)"><span>3-Phase 4-Wire Meter — 16 Fault Cases</span><span class="arrow">▼</span></div>
+    <div class="accord-body">
+      <p style="font-size:13px;color:var(--text2);margin-bottom:14px">Normal registration for 3φ 4-wire 3-element meter = 3·V·I·cos φ. Each element independent. Neutral is reference.</p>
+      <div class="grid g2">
+        <div class="fault-case">
+          <h4>Case 1 — One CT Open (R-phase current missing)</h4>
+          <div class="result">2 of 3 elements active. Registration = <strong>66.7%</strong>. Meter under-reads by 1/3.</div>
+        </div>
+        <div class="fault-case">
+          <h4>Case 2 — One CT Polarity Reversed (R-phase)</h4>
+          <div class="result">Element 1 reverses. Net = 2 forward – 1 reverse = <strong>33.3%</strong> at unity PF. Severe under-registration.</div>
+        </div>
+        <div class="fault-case">
+          <h4>Case 3 — Two CTs Polarity Reversed (R & Y reversed)</h4>
+          <div class="result">1 forward – 2 reverse. Registration = <strong>–33.3%</strong> (meter reverses slowly). Energy credited to consumer.</div>
+        </div>
+        <div class="fault-case">
+          <h4>Case 4 — All Three CTs Polarity Reversed</h4>
+          <div class="result">All elements reverse. Registration = <strong>–100%</strong>. Full reverse rotation. Classic tamper scenario.</div>
+        </div>
+        <div class="fault-case">
+          <h4>Case 5 — One Phase PT Fuse Open (R-phase voltage missing)</h4>
+          <div class="result">Element 1 loses voltage, reads zero. Elements 2&3 correct. Registration = <strong>66.7%</strong>.</div>
+        </div>
+        <div class="fault-case">
+          <h4>Case 6 — Two Phase PT Fuses Open (R & Y missing)</h4>
+          <div class="result">Only B-phase element active. Registration = <strong>33.3%</strong>.</div>
+        </div>
+        <div class="fault-case">
+          <h4>Case 7 — All PT Fuses Open</h4>
+          <div class="result">No voltage reference. <strong>Zero registration</strong>. All elements dead. Easily detected by inspection.</div>
+        </div>
+        <div class="fault-case">
+          <h4>Case 8 — R & Y Phase Current Leads Interchanged</h4>
+          <div class="result">Elements 1&2 see wrong phase currents — phasor displacement. Registration ≈ <strong>66.7% · cos(60°)</strong> ≈ <strong>33%</strong> at unity PF. Significant under-read.</div>
+        </div>
+        <div class="fault-case">
+          <h4>Case 9 — R & B Phase Current Leads Interchanged</h4>
+          <div class="result">Similar phasor displacement but different angle. Registration ≈ <strong>50%</strong> at unity PF.</div>
+        </div>
+        <div class="fault-case">
+          <h4>Case 10 — Neutral (N) current wire missing from meter</h4>
+          <div class="result">Voltage reference lost for all elements. If internally connected to neutral bus, may affect LT direct meter significantly. Registration = <strong>0 to 100%</strong> depending on balance.</div>
+        </div>
+        <div class="fault-case">
+          <h4>Case 11 — One CT reversed + One PT fuse open (same phase)</h4>
+          <div class="result">That element contributes nothing (no V) or negative (reversed I). Net = <strong>66.7%</strong> (other two elements correct).</div>
+        </div>
+        <div class="fault-case">
+          <h4>Case 12 — One CT reversed + One PT fuse open (different phases)</h4>
+          <div class="result">Two elements affected independently. One reverses, one drops to zero. Net = <strong>33.3%</strong> from single correct element.</div>
+        </div>
+        <div class="fault-case">
+          <h4>Case 13 — R-phase CT reversed + Y-phase CT open</h4>
+          <div class="result">Element 1: negative. Element 2: zero. Element 3: correct. Net = <strong>0%</strong> if 1 and 3 cancel, or small positive.</div>
+        </div>
+        <div class="fault-case">
+          <h4>Case 14 — Phase sequence reversed (R-Y-B becomes R-B-Y)</h4>
+          <div class="result">Reactive element reversed. KVARH meter may record wrong direction. KWH largely unaffected for balanced load but <strong>KVARH error</strong> causes PF penalty issue.</div>
+        </div>
+        <div class="fault-case">
+          <h4>Case 15 — Voltage and current of different phases cross-connected</h4>
+          <div class="result">Complex phasor mismatch. Registration = <strong>cos(120°)·3·VI</strong> = –<strong>50%</strong> at unity PF for full cross-connection. Meter reverses.</div>
+        </div>
+        <div class="fault-case">
+          <h4>Case 16 — External shunt across CT secondary</h4>
+          <div class="result">Part of CT secondary current bypassed. Meter sees reduced current. Registration proportional to <strong>(Rm / Rm+Rshunt)</strong>. Under-reads by shunt ratio.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="accord">
+    <div class="accord-hdr" onclick="toggleAccord(this)"><span>KVARH Element Vector Analysis</span><span class="arrow">▼</span></div>
+    <div class="accord-body">
+      <div class="two-col">
+        <div>
+          <h4>KVARH Measurement Principle</h4>
+          <p style="font-size:14px;margin-bottom:10px">For 3-phase 3-wire reactive energy meter, voltage phasors are phase-shifted by 90° before application to current elements. Standard cross-connection method:</p>
+          <ul class="eng">
+            <li>Element 1: I_R × V_YB (phase-shifted 90°) → measures Q_R component</li>
+            <li>Element 2: I_B × V_RY (phase-shifted 90°) → measures Q_B component</li>
+            <li>Total KVAR = (V_YB·I_R·sinφ + V_RY·I_B·sinφ) / √3</li>
+            <li>Forward registration = lagging KVAR (inductive load)</li>
+            <li>Reverse registration = leading KVAR (capacitive load)</li>
+          </ul>
+        </div>
+        <div>
+          <h4>Power Factor from Meter Readings</h4>
+          <div class="formula">
+            PF = cos φ = <span class="hi">KWH</span> / <span class="eq">KVAH</span><br><br>
+            KVAH = √(KWH² + KVARH²)<br><br>
+            tan φ = <span class="hi">KVARH</span> / <span class="eq">KWH</span><br><br>
+            PF incentive threshold (APSEB): <span class="val">0.90 lagging</span><br>
+            PF penalty below: <span class="val">0.85 lagging</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="accord">
+    <div class="accord-hdr" onclick="toggleAccord(this)"><span>Fault Detection Methods</span><span class="arrow">▼</span></div>
+    <div class="accord-body">
+      <div class="grid g3">
+        <div class="card" style="padding:16px">
+          <h4>Dial Test</h4>
+          <p style="font-size:13px;color:var(--text2)">Compare meter disc/pulse rate at known load. Calculate expected kWh. Compare with meter reading over timed interval. Registration % = (actual/expected) × 100.</p>
+        </div>
+        <div class="card" style="padding:16px">
+          <h4>Phantom Load Test</h4>
+          <p style="font-size:13px;color:var(--text2)">Apply known calibrated current/voltage from test kit at TTB. Meter runs on phantom load. Check % error against standard test meter simultaneously.</p>
+        </div>
+        <div class="card" style="padding:16px">
+          <h4>Clamp Meter Check</h4>
+          <p style="font-size:13px;color:var(--text2)">Measure actual current on each phase conductor. Compare with meter display current. Discrepancy indicates CT or connection fault.</p>
+        </div>
+        <div class="card" style="padding:16px">
+          <h4>Vector / Phasor Diagram</h4>
+          <p style="font-size:13px;color:var(--text2)">Use power analyser. Compare angle between V and I on each element. Cross-reference with expected load PF. Polarity reversal gives 180° offset.</p>
+        </div>
+        <div class="card" style="padding:16px">
+          <h4>Online Test (MRT Kit)</h4>
+          <p style="font-size:13px;color:var(--text2)">Portable testing kit connected to TTB while meter energised. Checks all three phase currents, voltages, phase angles, and % error simultaneously.</p>
+        </div>
+        <div class="card" style="padding:16px">
+          <h4>Consumption Pattern Analysis</h4>
+          <p style="font-size:13px;color:var(--text2)">Compare month-on-month consumption. Sudden unexplained drop indicates fault/tampering. Load survey comparison vs sanctioned MD.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- ===== FIELD TESTING ===== -->
+<div id="testing" class="section">
+  <div class="section-title">
+    <div class="section-icon" style="background:#E8F8EC">🧪</div>
+    <div><h1>Field Testing Procedures</h1><p class="subtitle">Phantom load test, dial test, online test, MRT lab, sealing</p></div>
+  </div>
+
+  <div class="accord">
+    <div class="accord-hdr" onclick="toggleAccord(this)"><span>Phantom Load Test</span><span class="arrow">▼</span></div>
+    <div class="accord-body">
+      <p style="font-size:14px;margin-bottom:12px">Test without disturbing consumer load. Current injected from portable source via TTB. Voltage from PT secondary or external source.</p>
+      <div class="two-col">
+        <div>
+          <h4>Equipment Required</h4>
+          <ul class="eng">
+            <li>Portable current source (0–5A, or 0–1A variable)</li>
+            <li>Burden resistors / inductors (adjustable PF)</li>
+            <li>Standard reference meter (class 0.1 or 0.2)</li>
+            <li>Stopwatch / revolution counter</li>
+            <li>TTB access key and shorting tools</li>
+          </ul>
+        </div>
+        <div>
+          <h4>Test Procedure</h4>
+          <div class="step"><div class="step-num">1</div><div class="step-body"><h4>Short CT secondaries at TTB</h4><p>Isolate meter CT circuit using TTB shorting links.</p></div></div>
+          <div class="step"><div class="step-num">2</div><div class="step-body"><h4>Inject phantom current</h4><p>Apply calibrated test current (typically 5A) at test current terminal of TTB.</p></div></div>
+          <div class="step"><div class="step-num">3</div><div class="step-body"><h4>Apply voltage</h4><p>Use PT secondary voltage (live) or portable voltage source at test voltage terminal.</p></div></div>
+          <div class="step"><div class="step-num">4</div><div class="step-body"><h4>Count revolutions / pulses</h4><p>Time N revolutions of disc (or count N optical pulses for static meter). Compare with reference meter.</p></div></div>
+          <div class="step"><div class="step-num">5</div><div class="step-body"><h4>Calculate % error</h4><p>% error = [(Wm – Ws)/Ws] × 100. Acceptable: ±2% (class 1), ±1% (class 0.5).</p></div></div>
+        </div>
+      </div>
+      <div class="formula">
+        % Error = <span class="hi">(W_meter – W_standard)</span> / <span class="eq">W_standard</span> × 100<br>
+        KWH per revolution = <span class="val">1000 / (MF × disc_constant)</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="accord">
+    <div class="accord-hdr" onclick="toggleAccord(this)"><span>Dial / Disc Test (On-Load)</span><span class="arrow">▼</span></div>
+    <div class="accord-body">
+      <div class="two-col">
+        <div>
+          <h4>Method — Timed Disc Revolutions</h4>
+          <ul class="eng">
+            <li>Note meter constant K (rev/kWh) on nameplate</li>
+            <li>Note CT ratio, PT ratio → calculate MF</li>
+            <li>Measure actual current on phase conductors (clamp meter)</li>
+            <li>Note voltmeter reading and power factor (if meter displays)</li>
+            <li>Calculate expected kWh: W_exp = V × I × cosφ × t / 1000</li>
+            <li>Count N revolutions, time T seconds</li>
+            <li>Calculate actual kWh: W_act = N / (K × MF)</li>
+            <li>Compare W_act vs W_exp</li>
+          </ul>
+        </div>
+        <div>
+          <div class="formula">
+            Time for N revolutions:<br>
+            T_expected = <span class="hi">N × 3600 × 1000</span> / <span class="eq">(P × K × MF)</span><br><br>
+            where P = actual load in Watts<br><br>
+            % Error = (<span class="hi">T_expected – T_actual</span>) / <span class="eq">T_expected</span> × 100
+          </div>
+          <div class="info-box" style="margin-top:12px">
+            <strong>Acceptable error limits:</strong><br>
+            Induction disc: ±2% class 1, ±1% class 0.5<br>
+            Static meter: ±1% class 1, ±0.5% class 0.5S
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="accord">
+    <div class="accord-hdr" onclick="toggleAccord(this)"><span>Online Test (MRT — Meter Reading Test)</span><span class="arrow">▼</span></div>
+    <div class="accord-body">
+      <p style="font-size:14px;margin-bottom:12px">MRT (Meter Reading Test) kit is a portable power analyser connected to TTB test terminals while meter energised. Performs complete electrical testing without interrupting supply.</p>
+      <div class="grid g3">
+        <div class="card" style="padding:16px">
+          <h4>What MRT Measures</h4>
+          <ul class="eng">
+            <li>Phase voltages (V_R, V_Y, V_B)</li>
+            <li>Phase currents (I_R, I_Y, I_B)</li>
+            <li>Phase angles (φ_R, φ_Y, φ_B)</li>
+            <li>Active power per phase</li>
+            <li>% error of meter under test</li>
+          </ul>
+        </div>
+        <div class="card" style="padding:16px">
+          <h4>Connection at TTB</h4>
+          <ul class="eng">
+            <li>Current: clamp-on CT or series injection at A terminals</li>
+            <li>Voltage: from L (link) terminals</li>
+            <li>Optical sensor or pulse input from meter</li>
+            <li>No need to short CT or isolate voltage</li>
+            <li>Non-intrusive for most modern kits</li>
+          </ul>
+        </div>
+        <div class="card" style="padding:16px">
+          <h4>RSS Testing Kit Panel</h4>
+          <ul class="eng">
+            <li>Rack-mounted or portable panel</li>
+            <li>Used in laboratory (MRT lab at division)</li>
+            <li>Can test multiple meters in sequence</li>
+            <li>Generates test report with % error at various load points (1%, 5%, 25%, 50%, 100%, 120% of rated current)</li>
+          </ul>
+        </div>
+      </div>
+      <div class="success-box" style="margin-top:12px">
+        <strong>MRT Lab Requirement (APSEB):</strong> Each meter must be tested at MRT laboratory before installation. Test report attached to consumer file. Meters failing ±2% limit rejected.
+      </div>
+    </div>
+  </div>
+
+  <div class="accord">
+    <div class="accord-hdr" onclick="toggleAccord(this)"><span>Earth Resistance Measurement</span><span class="arrow">▼</span></div>
+    <div class="accord-body">
+      <div class="two-col">
+        <div>
+          <h4>Equipment: EVERSHED Megger (Earth Tester)</h4>
+          <ul class="eng">
+            <li>3-terminal earth tester (most accurate method)</li>
+            <li>Terminals: E (Earth under test), P (Potential), C (Current)</li>
+            <li>2-terminal method: for quick check (includes lead resistance)</li>
+            <li>Operating frequency: 128 Hz or similar (avoids DC and 50Hz interference)</li>
+          </ul>
+          <h4 style="margin-top:14px">3-Terminal Method (Fall-of-Potential)</h4>
+          <div class="step"><div class="step-num">1</div><div class="step-body"><h4>Drive auxiliary electrodes</h4><p>C electrode: 30m from E. P electrode: 20m from E (62% of 30m distance).</p></div></div>
+          <div class="step"><div class="step-num">2</div><div class="step-body"><h4>Connect megger</h4><p>E→ earth electrode, P→ potential spike, C→ current spike.</p></div></div>
+          <div class="step"><div class="step-num">3</div><div class="step-body"><h4>Read resistance</h4><p>Rotate handle at 160 rpm. Read stable value on ohm scale.</p></div></div>
+          <div class="step"><div class="step-num">4</div><div class="step-body"><h4>Verify with ±20% P movement</h4><p>Move P ±20% of CE distance. If reading stable: valid result. If varies: widen electrode spacing.</p></div></div>
+        </div>
+        <div>
+          <h4>Acceptable Values</h4>
+          <table>
+            <tr><th>System</th><th>Max Earth Resistance</th></tr>
+            <tr><td>LT system (415V)</td><td>≤ 5 Ω</td></tr>
+            <tr><td>HT system (11kV)</td><td>≤ 1 Ω</td></tr>
+            <tr><td>EHV (33kV &amp; above)</td><td>≤ 0.5 Ω</td></tr>
+            <tr><td>Substation mesh earth</td><td>≤ 0.5 Ω</td></tr>
+          </table>
+          <h4 style="margin-top:14px">Safety — Step &amp; Touch Potential</h4>
+          <table>
+            <tr><th>Parameter</th><th>Value</th></tr>
+            <tr><td>Step Potential limit</td><td>4433 V / 3 seconds</td></tr>
+            <tr><td>Touch Potential limit</td><td>1711 V / 0.5s (wet)</td></tr>
+            <tr><td>Touch Potential (dry)</td><td>1890 V / 0.5s</td></tr>
+            <tr><td>Body resistance (assumed)</td><td>1000 Ω (hand-foot)</td></tr>
+          </table>
+          <div class="danger-box" style="margin-top:10px">
+            <strong>GPR (Ground Potential Rise):</strong> During fault, earth electrode potential rises. Step/touch potentials must be within safe limits per IS 3043.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="accord">
+    <div class="accord-hdr" onclick="toggleAccord(this)"><span>Phase Sequence Indicator</span><span class="arrow">▼</span></div>
+    <div class="accord-body">
+      <div class="two-col">
+        <div>
+          <h4>Operation</h4>
+          <p style="font-size:14px;margin-bottom:10px">Small device with 3 terminals (R, Y, B) and neon/LED indicators. Rotating disc indicates phase rotation direction.</p>
+          <ul class="eng">
+            <li>Correct sequence R-Y-B: forward rotation (clockwise disc or right LED lights)</li>
+            <li>Wrong sequence R-B-Y: reverse rotation (anticlockwise or left LED)</li>
+            <li>Used before CT/PT connection to verify phase sequence matches meter terminal labelling</li>
+            <li>Essential before commissioning HT consumers with motors</li>
+          </ul>
+        </div>
+        <div>
+          <div class="warn-box">
+            <strong>Why Phase Sequence Matters for Meters:</strong><br>
+            KVARH element measures reactive power direction based on assumed phase sequence. Wrong sequence → KVARH registers in wrong direction → power factor calculation error → billing error on two-part tariff.
+          </div>
+          <div class="info-box" style="margin-top:10px">
+            <strong>Standard APSEB:</strong> R-Y-B sequence mandatory. Verify with indicator before sealing meter. Record in inspection report.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- ===== SPECIAL TOPICS ===== -->
+<div id="special" class="section">
+  <div class="section-title">
+    <div class="section-icon" style="background:#FFF3E0">🚂</div>
+    <div><h1>Special Topics</h1><p class="subtitle">Traction metering, phase-shifting transformers, vector groups, HVDC concepts</p></div>
+  </div>
+
+  <div class="accord">
+    <div class="accord-hdr" onclick="toggleAccord(this)"><span>Traction Metering — SE Railway 132/25kV</span><span class="arrow">▼</span></div>
+    <div class="accord-body">
+      <div class="two-col">
+        <div>
+          <h4>Traction Power Transformer Details (Actual — APSEB Record)</h4>
+          <table>
+            <tr><th>Parameter</th><th>Value</th></tr>
+            <tr><td>Manufacturer</td><td>EMCO</td></tr>
+            <tr><td>Rating</td><td>21.6 MVA</td></tr>
+            <tr><td>Primary Voltage</td><td>132 kV (3-phase)</td></tr>
+            <tr><td>Secondary Voltage</td><td>25 kV (single-phase)</td></tr>
+            <tr><td>Application</td><td>SE Railway traction feeder</td></tr>
+            <tr><td>Connection</td><td>Scott-T or V-connection for single-phase from 3-phase</td></tr>
+            <tr><td>Metering at</td><td>132kV side (3-phase input)</td></tr>
+            <tr><td>Meter type</td><td>SECURE APEO645, class 0.5S</td></tr>
+            <tr><td>CT ratio</td><td>100/1A</td></tr>
+            <tr><td>PT (CVT) ratio</td><td>132kV / 110V</td></tr>
+          </table>
+        </div>
+        <div>
+          <h4>Traction Metering Challenges</h4>
+          <ul class="eng">
+            <li>Single-phase load on 3-phase grid → inherent imbalance</li>
+            <li>Load fluctuates rapidly (train acceleration/braking)</li>
+            <li>Regenerative braking → reverse power flow possible</li>
+            <li>Harmonics from traction drives (3rd, 5th, 7th)</li>
+            <li>Power factor typically 0.85–0.95 lagging</li>
+            <li>KVARH element must handle bidirectional energy</li>
+          </ul>
+          <div class="formula">
+            MF = <span class="hi">(100/1)</span> × <span class="eq">(132000/110)</span> = 100 × 1200 = <span class="val">120,000</span><br>
+            Actual kWh = Meter reading × 120,000
+          </div>
+          <div class="warn-box" style="margin-top:10px">
+            Traction metering uses CVT (not electromagnetic PT) at 132kV. CVT also used for protection and PLCC (Power Line Carrier Communication).
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="accord">
+    <div class="accord-hdr" onclick="toggleAccord(this)"><span>Phase Shifting Transformer (MC-21 / GE) — ABT Application</span><span class="arrow">▼</span></div>
+    <div class="accord-body">
+      <div class="two-col">
+        <div>
+          <h4>Phase Shifting Transformer (PST)</h4>
+          <p style="font-size:14px;margin-bottom:10px">Controls active power flow between grids by introducing phase angle difference between sending and receiving end voltages.</p>
+          <ul class="eng">
+            <li>Used at 400kV interconnection points</li>
+            <li>Model MC-21: manufactured by GE</li>
+            <li>Introduces phase advance or retard (±15° typical)</li>
+            <li>Active power flow: P = (V1·V2·sinδ) / X</li>
+            <li>Increasing δ increases power transfer</li>
+          </ul>
+          <div class="formula">
+            P = <span class="hi">V₁·V₂</span> · sin(δ) / <span class="eq">X</span><br>
+            PST shifts δ → controls P flow
+          </div>
+        </div>
+        <div>
+          <h4>Metering of PST</h4>
+          <ul class="eng">
+            <li>ABT meter on both primary and secondary of PST</li>
+            <li>UI (Unscheduled Interchange) measured at injection point</li>
+            <li>Frequency deviation from 50Hz → UI meter records deviation energy</li>
+            <li>Above 50Hz: generator over-injecting → UI credit</li>
+            <li>Below 50Hz: generator under-injecting → UI charge</li>
+          </ul>
+          <div class="info-box" style="margin-top:10px">
+            <strong>ABT Frequency Zones (CERC):</strong><br>
+            49.2–50.0 Hz: UI charges apply (increasing with deviation)<br>
+            50.0–50.5 Hz: UI credit for generators<br>
+            &lt;49.0 Hz: Emergency — load shedding protocol
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="accord">
+    <div class="accord-hdr" onclick="toggleAccord(this)"><span>Transformer Vector Groups — DYn11</span><span class="arrow">▼</span></div>
+    <div class="accord-body">
+      <div class="two-col">
+        <div>
+          <h4>Standard Distribution Transformer: DYn11</h4>
+          <ul class="eng">
+            <li><strong>D</strong> = Delta connected primary (11kV side)</li>
+            <li><strong>Y</strong> = Star connected secondary (440V/415V side)</li>
+            <li><strong>n</strong> = Neutral brought out on secondary</li>
+            <li><strong>11</strong> = Secondary lags primary by 30° (11 × 30° = 330° = –30° lag)</li>
+          </ul>
+          <div class="formula">
+            Clock notation: 11 = <span class="hi">–30°</span> or <span class="eq">330°</span> lag<br>
+            V_secondary lags V_primary by 30°
+          </div>
+          <div class="info-box" style="margin-top:10px">
+            <strong>Why DYn11 is standard:</strong> Delta primary suppresses 3rd harmonic circulation. Star secondary with neutral allows single-phase loads. 30° phase shift breaks circulating current in parallel transformers.
+          </div>
+        </div>
+        <div>
+          <h4>Vector Group Impact on Metering</h4>
+          <ul class="eng">
+            <li>CT on delta side: measures line current (= phase current in delta)</li>
+            <li>CT on star side: measures line current (= phase current in star)</li>
+            <li>30° phase shift means PT and CT phasors for differential protection must be corrected in relay software</li>
+            <li>For energy metering: phase shift irrelevant — same power both sides (minus losses)</li>
+            <li>DYn1 transformer: secondary leads by 30° (rare in India)</li>
+          </ul>
+          <table style="margin-top:10px">
+            <tr><th>Vector Group</th><th>Phase Shift</th><th>Use</th></tr>
+            <tr><td>DYn1</td><td>+30° (lead)</td><td>Rare</td></tr>
+            <tr><td>DYn11</td><td>–30° (lag)</td><td>Standard India</td></tr>
+            <tr><td>YNyn0</td><td>0°</td><td>Auto-transformer</td></tr>
+            <tr><td>DZn0</td><td>0°</td><td>Rectifier TX</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="accord">
+    <div class="accord-hdr" onclick="toggleAccord(this)"><span>Power Station SLD — 210 MW Unit</span><span class="arrow">▼</span></div>
+    <div class="accord-body">
+      <p style="font-size:14px;margin-bottom:12px">Typical 210 MW thermal power station metering arrangement (from manuscript):</p>
+      <div class="grid g3">
+        <div class="card" style="padding:16px;border-top:3px solid var(--red)">
+          <h4>Generator Terminal</h4>
+          <ul class="eng">
+            <li>Generator: 210 MW, 15.75kV, 3-phase</li>
+            <li>Generator CT: class 0.2S, 5P20</li>
+            <li>Bus PT: class 0.2, 15.75kV/110V</li>
+            <li>ABT meter at generator bus</li>
+            <li>Trivector meter for internal billing</li>
+          </ul>
+        </div>
+        <div class="card" style="padding:16px;border-top:3px solid var(--orange)">
+          <h4>Unit Transformer</h4>
+          <ul class="eng">
+            <li>Generator Transformer (GT): 210 MVA, 15.75/220kV, YD1</li>
+            <li>Unit Auxiliary Transformer: 15.75/6.6kV</li>
+            <li>Station Transformer: 220/6.6kV for startup</li>
+            <li>Metering CT at 220kV: CVT for PT</li>
+          </ul>
+        </div>
+        <div class="card" style="padding:16px;border-top:3px solid var(--blue)">
+          <h4>Grid Connection Point</h4>
+          <ul class="eng">
+            <li>220kV or 400kV grid bus</li>
+            <li>ABT main + check meter mandatory</li>
+            <li>Special Energy Meter (SEM) as per CERC</li>
+            <li>15-min interval recording</li>
+            <li>SCADA data to SLDC in real time</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="accord">
+    <div class="accord-hdr" onclick="toggleAccord(this)"><span>Buchholz Relay &amp; Transformer Protection</span><span class="arrow">▼</span></div>
+    <div class="accord-body">
+      <div class="two-col">
+        <div>
+          <h4>Buchholz Relay</h4>
+          <p style="font-size:14px;margin-bottom:10px">Gas-actuated relay installed in pipe between transformer main tank and conservator tank. Detects internal faults.</p>
+          <ul class="eng">
+            <li>Float-operated mercury switch (upper float) → alarm on slow gas accumulation</li>
+            <li>Surge flap (lower element) → trip on heavy gas surge from severe fault</li>
+            <li>Gas accumulation indicates: insulation breakdown, overheating, core fault, arcing</li>
+            <li>Gas sample extracted from valve — tested: CO2 (insulation), H2 (oil breakdown), C2H2 (arcing)</li>
+          </ul>
+        </div>
+        <div>
+          <h4>Other Transformer Protections</h4>
+          <ul class="eng">
+            <li><strong>Differential protection (87T):</strong> Compares primary and secondary currents. Operates on difference (fault current). Requires vector group correction in relay.</li>
+            <li><strong>Restricted Earth Fault (64R/87N):</strong> Detects earth fault near neutral of star winding.</li>
+            <li><strong>Overcurrent (51/50):</strong> Backup protection for through faults.</li>
+            <li><strong>Temperature protection:</strong> Oil temp (OTI) and winding temp (WTI) relays. Alarm at 85°C, trip at 100°C (typical).</li>
+            <li><strong>Pressure Relief Device (PRD):</strong> Rupture disk for sudden over-pressure. Trip auxiliary contact.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="accord">
+    <div class="accord-hdr" onclick="toggleAccord(this)"><span>Cheepurupalli 33/11kV Substation — Actual Ledger Data</span><span class="arrow">▼</span></div>
+    <div class="accord-body">
+      <p style="font-size:14px;margin-bottom:12px">Actual meter particulars from APSEB ledger (KSP Kumar manuscript, 33/11kV Cheepurupalli substation):</p>
+      <div class="info-box" style="margin-bottom:12px">
+        <strong>Note:</strong> This is actual field data from APSEB operational records. Used for training and reference verification purposes.
+      </div>
+      <table>
+        <tr><th>Feeder/Consumer</th><th>CT Ratio</th><th>PT Ratio</th><th>Meter Make</th><th>MF</th><th>Remarks</th></tr>
+        <tr><td>33kV Incoming</td><td>100/5A</td><td>33kV/110V</td><td>SECURE</td><td>6000</td><td>Main + Check ABT</td></tr>
+        <tr><td>11kV Feeder 1</td><td>200/5A</td><td>11kV/110V</td><td>L&amp;T</td><td>4000</td><td>HTCT consumer feeder</td></tr>
+        <tr><td>11kV Feeder 2</td><td>100/5A</td><td>11kV/110V</td><td>AEI</td><td>2000</td><td>Industrial HT consumer</td></tr>
+        <tr><td>Bus-PT (11kV)</td><td>—</td><td>11kV/110V</td><td>—</td><td>—</td><td>Protection only, 5-limb</td></tr>
+        <tr><td>Transformer Auxiliary</td><td>50/5A</td><td>415V direct</td><td>Genus</td><td>10</td><td>LTCT, station auxiliary</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+<!-- ===== STANDARDS ===== -->
+<div id="standards" class="section">
+  <div class="section-title">
+    <div class="section-icon" style="background:#F2F2F7">📋</div>
+    <div><h1>Standards &amp; Regulations</h1><p class="subtitle">IS, CEA, CERC, and APSEB applicable standards for HT metering</p></div>
+  </div>
+
+  <div class="grid g2" style="margin-bottom:24px">
+    <div class="card" style="border-top:4px solid var(--blue)">
+      <span class="badge badge-blue">IS 2705</span>
+      <h3>Current Transformers</h3>
+      <ul class="eng">
+        <li><strong>Part I:</strong> General requirements (1992)</li>
+        <li><strong>Part II:</strong> Measuring CTs — accuracy, rated burden, ALF</li>
+        <li><strong>Part III:</strong> Protection CTs — rated knee point, accuracy limit factor</li>
+        <li><strong>Part IV:</strong> Specification for line CTs for special purposes</li>
+        <li>Accuracy classes: 0.1, 0.2, 0.2S, 0.5, 0.5S, 1, 3, 5</li>
+        <li>Protection classes: 5P, 10P (with ALF suffix)</li>
+      </ul>
+    </div>
+    <div class="card" style="border-top:4px solid var(--orange)">
+      <span class="badge badge-orange">IS 3156</span>
+      <h3>Voltage Transformers</h3>
+      <ul class="eng">
+        <li><strong>Part I:</strong> General requirements</li>
+        <li><strong>Part II:</strong> Measuring VTs — accuracy, burden</li>
+        <li><strong>Part III:</strong> Electromagnetic VTs &gt;1kV</li>
+        <li><strong>Part IV:</strong> Capacitor voltage transformers (CVT)</li>
+        <li>Accuracy classes: 0.1, 0.2, 0.5, 1.0, 3P, 6P</li>
+        <li>Rated burden: 10VA, 25VA, 50VA, 100VA, 200VA</li>
+      </ul>
+    </div>
+    <div class="card" style="border-top:4px solid var(--green)">
+      <span class="badge badge-green">IS 14697</span>
+      <h3>AC Static Watt-Hour Meters</h3>
+      <ul class="eng">
+        <li>Covers static (electronic) energy meters</li>
+        <li>Replaces electromechanical requirements from IS 722</li>
+        <li>Accuracy classes 0.2S, 0.5S, 1, 2</li>
+        <li>Defines terminal configuration types 1–18</li>
+        <li>Test conditions: reference conditions and influence quantities</li>
+        <li>Storage, transit, and climatic test requirements</li>
+      </ul>
+    </div>
+    <div class="card" style="border-top:4px solid var(--purple)">
+      <span class="badge badge-purple">CEA Metering Regulations 2006</span>
+      <h3>Central Electricity Authority</h3>
+      <ul class="eng">
+        <li>Mandatory for all utilities — generation, transmission, distribution</li>
+        <li>CT accuracy: 0.2S for transmission metering</li>
+        <li>PT accuracy: 0.2 for transmission metering</li>
+        <li>Static meters mandatory for HT consumers</li>
+        <li>Meter testing: every 5 years or on consumer complaint</li>
+        <li>ABT meters: sealed by STU, data to SLDC</li>
+        <li>Consumer right to request meter testing</li>
+      </ul>
+    </div>
+    <div class="card" style="border-top:4px solid var(--teal)">
+      <span class="badge badge-teal">CERC ABT Regulations</span>
+      <h3>Central Electricity Regulatory Commission</h3>
+      <ul class="eng">
+        <li>Availability Based Tariff framework for bulk power</li>
+        <li>All generating units ≥ 1 MW: ABT metering mandatory</li>
+        <li>15-minute block energy measurement</li>
+        <li>UI (Unscheduled Interchange) charges linked to frequency deviation</li>
+        <li>Special Energy Meters (SEM) at state boundary</li>
+        <li>Data transmitted to NLDC/RLDC/SLDC in real time</li>
+      </ul>
+    </div>
+    <div class="card" style="border-top:4px solid var(--red)">
+      <span class="badge badge-red">IS 3043</span>
+      <h3>Code of Practice for Earthing</h3>
+      <ul class="eng">
+        <li>Covers earth electrode design, materials</li>
+        <li>Measurement of earth resistance (fall-of-potential method)</li>
+        <li>Step and touch potential calculations</li>
+        <li>Mesh earthing for substations</li>
+        <li>Body resistance assumptions: 1000 Ω</li>
+        <li>Permissible limits: step (4433V/3s), touch (1711V/0.5s)</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2 style="margin-bottom:16px">Key Relay Function Numbers (ASDFN — as in manuscript)</h2>
+  <div style="overflow-x:auto;margin-bottom:24px">
+  <table>
+    <tr><th>Relay No.</th><th>Function</th><th>Application</th></tr>
+    <tr><td>21</td><td>Distance relay</td><td>Line protection (EHV)</td></tr>
+    <tr><td>27</td><td>Under-voltage relay</td><td>Bus protection, motor start lockout</td></tr>
+    <tr><td>50</td><td>Instantaneous overcurrent</td><td>Fault protection — high set</td></tr>
+    <tr><td>51</td><td>Time-delay overcurrent</td><td>Feeder/transformer backup protection</td></tr>
+    <tr><td>59</td><td>Overvoltage relay</td><td>Generator / capacitor bank protection</td></tr>
+    <tr><td>64</td><td>Earth fault relay</td><td>Ground fault — restricted or unrestricted</td></tr>
+    <tr><td>67</td><td>Directional overcurrent</td><td>Parallel feeders, ring systems</td></tr>
+    <tr><td>81</td><td>Frequency relay</td><td>Under/over frequency (load shedding, generator)</td></tr>
+    <tr><td>85</td><td>Carrier pilot relay</td><td>EHV line protection (PLCC)</td></tr>
+    <tr><td>87B</td><td>Bus differential relay</td><td>Busbar protection (EHV)</td></tr>
+    <tr><td>87T</td><td>Transformer differential</td><td>Transformer internal fault protection</td></tr>
+    <tr><td>87G</td><td>Generator differential</td><td>Generator stator winding protection</td></tr>
+  </table>
+  </div>
+
+  <h2 style="margin-bottom:16px">60-Point Checklist — HT Service Release</h2>
+  <div class="info-box" style="margin-bottom:16px">
+    <strong>Note:</strong> Full 60-point formula document (DOCX) was separately uploaded. Key categories listed below from APSEB practice:
+  </div>
+  <div class="grid g3">
+    <div class="card" style="padding:16px">
+      <span class="badge badge-blue">Points 1–15</span>
+      <h4>Consumer Application &amp; Approval</h4>
+      <ul class="eng">
+        <li>Application form (HT-A) submitted</li>
+        <li>Demand assessment by DISCOM</li>
+        <li>Approval by Chief Engineer / SE</li>
+        <li>Agreement signed by consumer</li>
+        <li>Security deposit paid (based on MD)</li>
+      </ul>
+    </div>
+    <div class="card" style="padding:16px">
+      <span class="badge badge-orange">Points 16–30</span>
+      <h4>Equipment Inspection</h4>
+      <ul class="eng">
+        <li>CT test certificates (MRT lab)</li>
+        <li>PT test certificates</li>
+        <li>Meter test certificate (within 5 years)</li>
+        <li>CT/PT manufacturer type test reports</li>
+        <li>Consumer substation inspection by AE</li>
+      </ul>
+    </div>
+    <div class="card" style="padding:16px">
+      <span class="badge badge-green">Points 31–45</span>
+      <h4>Wiring &amp; Connection Verification</h4>
+      <ul class="eng">
+        <li>CT polarity verified (battery test)</li>
+        <li>PT polarity verified</li>
+        <li>Phase sequence verified (R-Y-B)</li>
+        <li>CT burden within rated value</li>
+        <li>TTB connections verified</li>
+      </ul>
+    </div>
+    <div class="card" style="padding:16px">
+      <span class="badge badge-purple">Points 46–60</span>
+      <h4>Commissioning &amp; Sealing</h4>
+      <ul class="eng">
+        <li>Phantom load test (% error within limit)</li>
+        
+        <li>Online test (MRT kit reading)</li>
+        <li>All 4 sealing points sealed</li>
+        <li>Meter reading recorded at commissioning</li>
+        <li>Meter serial number in DISCOM database</li>
+        <li>Consumer meter card issued</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<script>
+function showSection(id, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+function toggleAccord(hdr) {
+  const body = hdr.nextElementSibling;
+  const isOpen = body.classList.contains('open');
+  const parent = hdr.closest('.section') || document.body;
+  parent.querySelectorAll('.accord-body.open').forEach(b => {
+    b.classList.remove('open');
+    b.previousElementSibling.classList.remove('open');
+  });
+  if (!isOpen) {
+    body.classList.add('open');
+    hdr.classList.add('open');
+  }
+}
+
+/* ===== FAULT ANALYSIS — Technically Correct Animated Visuals ===== */
+/* Phasors are STATIC; only the meter disc rotates. Each fault is shown by altering
+   the affected phasor (CT reversed -> 180 deg flipped arrow; CT open -> faint X mark;
+   PT fuse missing -> V phasor faded with X; phase leads interchanged -> labels swap). */
+
+var F_COLOR = { R: '#FF3B30', Y: '#c89900', B: '#0071E3' };
+var F_POS = {
+  R: { x: 1.0,  y: 0.0    },
+  Y: { x: -0.5, y: 0.866  },
+  B: { x: -0.5, y: -0.866 }
+};
+
+function inferFaultRegistration(text) {
+  var m = text.match(/registration\s*[=≈]?\s*([–\-]?\s*\d+(?:\.\d+)?)\s*%/i);
+  if (m) return parseFloat(m[1].replace(/\s/g,'').replace('–','-'));
+  if (/zero registration|does not register|meter (?:stops|does not)/i.test(text)) return 0;
+  var neg = text.match(/[–\-]\s*(\d+(?:\.\d+)?)\s*%/);
+  if (neg) return -parseFloat(neg[1]);
+  var pos = text.match(/(\d+(?:\.\d+)?)\s*%/);
+  if (pos) return parseFloat(pos[1]);
+  return 100;
+}
+
+function parseFaultDetails(title, result) {
+  var t = (title + ' / ' + result).toLowerCase();
+  var d = { I:{R:'ok',Y:'ok',B:'ok'}, V:{R:'ok',Y:'ok',B:'ok'}, swapI:null, swapV:null };
+  if (/all (?:three )?ct.*revers|three ct.*revers/.test(t)) {
+    d.I.R = d.I.Y = d.I.B = 'reversed';
+  } else if (/both ct.*polarity revers|both ct.*revers/.test(t)) {
+    d.I.R = d.I.B = 'reversed';
+  } else if (/two ct.*revers/.test(t)) {
+    d.I.R = d.I.Y = 'reversed';
+  } else {
+    if (/r[- ]?phase.*ct.*revers|ct.*revers.*r[- ]?phase|\br[- ]?phase\s*revers|\(r[- ]?phase\s*revers/.test(t)) d.I.R = 'reversed';
+    if (/y[- ]?phase.*ct.*revers|ct.*revers.*y[- ]?phase|\by[- ]?phase\s*revers/.test(t)) d.I.Y = 'reversed';
+    if (/b[- ]?phase.*ct.*revers|ct.*revers.*b[- ]?phase|\bb[- ]?phase\s*revers/.test(t)) d.I.B = 'reversed';
+    if (d.I.R==='ok' && d.I.Y==='ok' && d.I.B==='ok' && /one ct.*polarity revers/.test(t)) d.I.R = 'reversed';
+  }
+  if (/all.*ct.*open|all ct.*missing/.test(t)) {
+    d.I.R = d.I.Y = d.I.B = 'open';
+  } else if (/only b[- ]?phase ct/.test(t)) {
+    d.I.R = 'open'; d.I.Y = 'open';
+  } else {
+    if (/no current r[- ]?phase|r[- ]?phase.*current.*missing|ct.*r[- ]?phase.*(open|miss)|r[- ]?phase.*ct.*(open|miss)|r[- ]?phase ct missing|r[- ]?phase\s*current\s*missing/.test(t)) d.I.R = 'open';
+    if (/no current y[- ]?phase|y[- ]?phase.*current.*missing|ct.*y[- ]?phase.*(open|miss)|y[- ]?phase.*ct.*(open|miss)/.test(t)) d.I.Y = 'open';
+    if (/no current b[- ]?phase|b[- ]?phase.*current.*missing|ct.*b[- ]?phase.*(open|miss)|b[- ]?phase.*ct.*(open|miss)/.test(t)) d.I.B = 'open';
+    if (d.I.R==='ok' && d.I.Y==='ok' && d.I.B==='ok' && /one ct.*(?:secondary )?open|ct (?:secondary )?open|one ct open/.test(t) && !/\(b[- ]?phase|\(y[- ]?phase/.test(t)) d.I.R = 'open';
+  }
+  if (/all pt fuse|all pt.*open|both elements lose voltage/.test(t)) {
+    d.V.R = d.V.Y = d.V.B = 'open';
+  } else if (/both pt fuse|two phase pt fuse|two .*pt fuse.*open/.test(t)) {
+    d.V.R = d.V.Y = 'open';
+  } else {
+    if (/r[- ]?phase.*pt.*(fuse|miss|open)|pt.*r[- ]?phase.*(fuse|miss|open)|r[- ]?phase voltage missing|voltage.*r[- ]?phase.*miss/.test(t)) d.V.R = 'open';
+    if (/y[- ]?phase.*pt.*(fuse|miss|open)|pt.*y[- ]?phase.*(fuse|miss|open)|y[- ]?phase voltage missing/.test(t)) d.V.Y = 'open';
+    if (/b[- ]?phase.*pt.*(fuse|miss|open)|pt.*b[- ]?phase.*(fuse|miss|open)|b[- ]?phase voltage missing|voltage.*b[- ]?phase.*miss/.test(t)) d.V.B = 'open';
+    if (d.V.R==='ok' && d.V.Y==='ok' && d.V.B==='ok' && /one pt fuse|pt fuse (?:missing|open)/.test(t)) d.V.R = 'open';
+  }
+  if (/r\s*&\s*y\s*(?:phase\s*)?current\s*leads?\s*interchang|r\s*and\s*y\s*(?:phase\s*)?current.*interchang/.test(t)) d.swapI = ['R','Y'];
+  else if (/r\s*&\s*b\s*(?:phase\s*)?current\s*leads?\s*interchang|r\s*and\s*b\s*(?:phase\s*)?current.*interchang|current circuit r\s*&\s*b/.test(t)) d.swapI = ['R','B'];
+  else if (/y\s*&\s*b\s*(?:phase\s*)?current/.test(t) && /interchang/.test(t)) d.swapI = ['Y','B'];
+  if (/y\s*&\s*b\s*(?:phase\s*)?voltage\s*leads?\s*interchang/.test(t)) d.swapV = ['Y','B'];
+  else if (/r\s*&\s*y\s*(?:phase\s*)?voltage.*interchang/.test(t)) d.swapV = ['R','Y'];
+  return d;
+}
+
+function detectFaultFlags(title, result) {
+  var t = (title + ' ' + result).toLowerCase();
+  var flags = [];
+  if (/all (?:three )?ct.*revers/.test(t)) flags.push({label:'All CTs reversed', cls:''});
+  else if (/two ct.*revers|both ct.*revers/.test(t)) flags.push({label:'2x CT reversed', cls:''});
+  else if (/ct.*polarity revers|ct.*revers/.test(t)) flags.push({label:'CT polarity reversed', cls:''});
+  if (/all pt fuse|all pt.*open/.test(t)) flags.push({label:'All PT fuses missing', cls:''});
+  else if (/both pt fuse|two .*pt fuse/.test(t)) flags.push({label:'2x PT fuse missing', cls:''});
+  else if (/pt fuse|voltage missing/.test(t)) flags.push({label:'PT fuse missing', cls:'warn'});
+  if (/ct.*(?:secondary )?(?:open|missing)|current.*missing/.test(t)) flags.push({label:'CT secondary open', cls:'warn'});
+  if (/interchang/.test(t)) flags.push({label:'Phase leads interchanged', cls:'warn'});
+  if (/cross[- ]?connect/.test(t)) flags.push({label:'Cross-connection', cls:''});
+  if (/external shunt|shunt across/.test(t)) flags.push({label:'External shunt across CT', cls:'warn'});
+  if (/neutral.*(?:missing|open|wire missing)/.test(t)) flags.push({label:'Neutral missing', cls:'warn'});
+  if (/phase sequence revers|sequence reversed/.test(t)) flags.push({label:'Phase sequence reversed', cls:'warn'});
+  return flags;
+}
+
+function drawArrow(x1, y1, x2, y2, color, opts) {
+  opts = opts || {};
+  var dx = x2 - x1, dy = y2 - y1;
+  var ang = Math.atan2(dy, dx);
+  var ah = opts.size || 6;
+  var bx = x2 - ah * Math.cos(ang);
+  var by = y2 - ah * Math.sin(ang);
+  var pw = (opts.size || 6) * 0.5;
+  var p1x = bx + pw * Math.cos(ang + Math.PI/2);
+  var p1y = by + pw * Math.sin(ang + Math.PI/2);
+  var p2x = bx - pw * Math.cos(ang + Math.PI/2);
+  var p2y = by - pw * Math.sin(ang + Math.PI/2);
+  var width = opts.width || 2.2;
+  var dash = opts.dash ? ' stroke-dasharray="'+opts.dash+'"' : '';
+  var opacity = opts.opacity != null ? opts.opacity : 1;
+  return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+color+'" stroke-width="'+width+'"'+dash+' opacity="'+opacity+'"/>' +
+         '<polygon points="'+x2+','+y2+' '+p1x.toFixed(2)+','+p1y.toFixed(2)+' '+p2x.toFixed(2)+','+p2y.toFixed(2)+'" fill="'+color+'" opacity="'+opacity+'"/>';
+}
+
+function xMark(cx, cy, r) {
+  return '<g transform="translate('+cx+' '+cy+')">' +
+         '<circle r="'+r+'" fill="#FFFFFF" stroke="#FF3B30" stroke-width="1.3"/>' +
+         '<path d="M -'+(r*0.5)+' -'+(r*0.5)+' L '+(r*0.5)+' '+(r*0.5)+' M -'+(r*0.5)+' '+(r*0.5)+' L '+(r*0.5)+' -'+(r*0.5)+'" stroke="#FF3B30" stroke-width="1.4" fill="none"/>' +
+         '</g>';
+}
+
+function buildPhasorSvg(d, cx, cy, R) {
+  var s = '';
+  s += '<circle cx="'+cx+'" cy="'+cy+'" r="'+(R+10)+'" fill="#FFFFFF" stroke="#D2D2D7" stroke-width="0.8"/>';
+  s += '<circle cx="'+cx+'" cy="'+cy+'" r="'+R+'" fill="none" stroke="#D2D2D7" stroke-width="0.4" stroke-dasharray="1.5,2.5"/>';
+  var place = { R:'R', Y:'Y', B:'B' };
+  if (d.swapI) { place[d.swapI[0]] = d.swapI[1]; place[d.swapI[1]] = d.swapI[0]; }
+  var vPlace = { R:'R', Y:'Y', B:'B' };
+  if (d.swapV) { vPlace[d.swapV[0]] = d.swapV[1]; vPlace[d.swapV[1]] = d.swapV[0]; }
+  ['R','Y','B'].forEach(function(p) {
+    var vp = F_POS[vPlace[p]];
+    var color = F_COLOR[p];
+    var vx = cx + vp.x * R;
+    var vy = cy + vp.y * R;
+    if (d.V[p] === 'open') {
+      s += '<line x1="'+cx+'" y1="'+cy+'" x2="'+vx.toFixed(2)+'" y2="'+vy.toFixed(2)+'" stroke="'+color+'" stroke-width="1.4" stroke-dasharray="3,2.5" opacity="0.3"/>';
+      s += xMark(vx, vy, 5.5);
+    } else {
+      s += drawArrow(cx, cy, vx, vy, color, { width: 2.4, size: 6 });
+    }
+    var lx = cx + vp.x * (R + 10);
+    var ly = cy + vp.y * (R + 10);
+    s += '<text x="'+lx.toFixed(2)+'" y="'+(ly+3).toFixed(2)+'" font-size="9" fill="'+color+'" font-weight="800" text-anchor="middle">V'+p+'</text>';
+    var ip = F_POS[place[p]];
+    var iScale = 0.72;
+    var iX = cx + ip.x * R * iScale;
+    var iY = cy + ip.y * R * iScale;
+    if (d.I[p] === 'open') {
+      s += '<line x1="'+cx+'" y1="'+cy+'" x2="'+iX.toFixed(2)+'" y2="'+iY.toFixed(2)+'" stroke="'+color+'" stroke-width="1.2" stroke-dasharray="2,2" opacity="0.22"/>';
+      s += xMark(iX, iY, 4.6);
+    } else if (d.I[p] === 'reversed') {
+      var rX = cx - ip.x * R * iScale;
+      var rY = cy - ip.y * R * iScale;
+      s += drawArrow(cx, cy, rX, rY, '#FF3B30', { width: 1.9, size: 5.5, dash: '4,2.5' });
+      s += '<text x="'+rX.toFixed(2)+'" y="'+(rY-7).toFixed(2)+'" font-size="8" fill="#FF3B30" font-weight="800" text-anchor="middle">I'+p+' ↺</text>';
+    } else {
+      s += drawArrow(cx, cy, iX, iY, color, { width: 1.7, size: 4.8, opacity: 0.85 });
+      s += '<text x="'+(cx + ip.x * R * 0.45).toFixed(2)+'" y="'+(cy + ip.y * R * 0.45 + 3).toFixed(2)+'" font-size="7.5" fill="'+color+'" font-weight="700" text-anchor="middle">I'+p+'</text>';
+    }
+  });
+  s += '<circle cx="'+cx+'" cy="'+cy+'" r="2.6" fill="#1D1D1F"/>';
+  return s;
+}
+
+function buildDiscSvg(pct, caseNum, cx, cy, R) {
+  var stopped = pct === 0;
+  var dir = pct < 0 ? -1 : 1;
+  var speed = stopped ? 0 : Math.max(1.6, 7 - Math.abs(pct) / 22);
+  var color = stopped ? '#8E8E93' : (pct < 0 ? '#FF3B30' : '#34C759');
+  var dirLabel = stopped ? 'STOPPED' : (pct < 0 ? 'REVERSE' : 'FORWARD');
+  var s = '';
+  s += '<g transform="translate('+cx+' '+cy+')">';
+  s += '<circle r="'+R+'" fill="#FFFFFF" stroke="'+color+'" stroke-width="2.5"/>';
+  s += '<circle r="'+(R-5)+'" fill="none" stroke="'+color+'" stroke-width="0.5" opacity="0.5"/>';
+  s += '<g>';
+  s += '<rect x="-'+(R-6)+'" y="-3" width="'+(2*R-12)+'" height="6" rx="3" fill="'+color+'"/>';
+  s += '<line x1="0" y1="-'+(R-6)+'" x2="0" y2="'+(R-6)+'" stroke="'+color+'" stroke-width="1.5" opacity="0.3"/>';
+  s += '<circle cx="'+(R-12)+'" cy="0" r="3" fill="#FFFFFF"/>';
+  s += '<circle cx="-'+(R-12)+'" cy="0" r="3" fill="#FFFFFF"/>';
+  if (!stopped) {
+    s += '<animateTransform attributeName="transform" type="rotate" from="0 0 0" to="'+(360*dir)+' 0 0" dur="'+speed.toFixed(1)+'s" repeatCount="indefinite"/>';
+  }
+  s += '</g>';
+  s += '<circle r="5" fill="#1D1D1F"/>';
+  s += '<circle r="2.5" fill="'+color+'"/>';
+  if (!stopped) {
+    if (dir > 0) {
+      s += '<path d="M '+(R-3)+' -8 A '+(R+1)+' '+(R+1)+' 0 0 1 '+(R-3)+' 8" fill="none" stroke="'+color+'" stroke-width="1.8" marker-end="url(#discArr'+caseNum+')" opacity="0.85"/>';
+    } else {
+      s += '<path d="M -'+(R-3)+' -8 A '+(R+1)+' '+(R+1)+' 0 0 0 -'+(R-3)+' 8" fill="none" stroke="'+color+'" stroke-width="1.8" marker-end="url(#discArr'+caseNum+')" opacity="0.85"/>';
+    }
+  }
+  s += '</g>';
+  s += '<text x="'+cx+'" y="'+(cy + R + 14)+'" text-anchor="middle" font-size="10" font-weight="700" fill="'+color+'">'+dirLabel+'</text>';
+  return s;
+}
+
+function buildFaultVizSvg(pct, caseNum, flags, details) {
+  var color = pct === 0 ? '#8E8E93' : (pct < 0 ? '#FF3B30' : '#34C759');
+  var sign = pct < 0 ? '−' : '';
+  var pctAbs = Math.abs(pct);
+  var pctStr = pctAbs % 1 === 0 ? pctAbs.toFixed(0) : pctAbs.toFixed(1);
+  var flagHtml = flags.length === 0 ? '<span class="fflag ok">Normal connection</span>' :
+    flags.map(function(f) { return '<span class="fflag '+(f.cls||'')+'">' + f.label + '</span>'; }).join('');
+  var svg = '';
+  svg += '<svg viewBox="0 0 360 160" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">';
+  svg += '<defs><marker id="discArr'+caseNum+'" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><polygon points="0,0 6,3 0,6" fill="'+color+'"/></marker></defs>';
+  svg += '<text x="180" y="12" text-anchor="middle" font-size="9" font-weight="700" fill="#6E6E73" letter-spacing="0.4">STATIC PHASOR  •  ENERGY DISC (animated)</text>';
+  svg += buildPhasorSvg(details, 62, 82, 40);
+  svg += '<text x="62" y="148" text-anchor="middle" class="vlabel">PHASOR DIAGRAM</text>';
+  svg += '<g transform="translate(180 78)">';
+  svg += '<text x="0" y="2" text-anchor="middle" class="vbig" fill="'+color+'">'+sign+pctStr+'%</text>';
+  svg += '<text x="0" y="18" text-anchor="middle" class="vsub">REGISTRATION</text>';
+  svg += '</g>';
+  svg += '<text x="180" y="148" text-anchor="middle" class="vlabel">VS NORMAL READING</text>';
+  svg += buildDiscSvg(pct, caseNum, 298, 82, 36);
+  svg += '</svg>';
+  return '<div class="fault-flags">' + flagHtml + '</div>' + svg;
+}
+
+function renderFaultVisuals() {
+  var cases = document.querySelectorAll('.fault-case');
+  var n = 0;
+  cases.forEach(function(el) {
+    n++;
+    var prior = el.querySelectorAll('.fault-viz');
+    prior.forEach(function(x){ x.remove(); });
+    var titleEl = el.querySelector('h4');
+    var resultEl = el.querySelector('.result');
+    var title = titleEl ? titleEl.textContent : '';
+    var result = resultEl ? resultEl.textContent : '';
+    var pct = inferFaultRegistration(result);
+    var flags = detectFaultFlags(title, result);
+    var details = parseFaultDetails(title, result);
+    var wrap = document.createElement('div');
+    wrap.className = 'fault-viz';
+    wrap.innerHTML = buildFaultVizSvg(pct, n, flags, details);
+    el.appendChild(wrap);
+  });
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', renderFaultVisuals);
+} else {
+  renderFaultVisuals();
+}
+</script>
+</body>
+</html>
